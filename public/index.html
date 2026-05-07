@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParserKolesa</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0a0a0f;
+  color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #12121a;
+  border-right: 1px solid #1e1e30;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.logo {
+  padding: 20px 18px;
+  border-bottom: 1px solid #1e1e30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #6c5ce7, #a78bfa);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e8e8f0;
+  letter-spacing: -0.3px;
+}
+.logo-sub {
+  font-size: 10px;
+  color: #55556a;
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+.nav { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 1px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 10px; border-radius: 7px;
+  color: #55556a; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item svg { flex-shrink: 0; }
+.nav-item:hover { background: #16162a; color: #a8a8c8; }
+.nav-item.active { background: rgba(108,92,231,.12); color: #8b7cf0; }
+.nav-item.active svg { color: #8b7cf0; }
+
+.nav-section {
+  padding: 14px 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #33334a;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.status-bar {
+  padding: 12px 14px;
+  border-top: 1px solid #1e1e30;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.status-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: #55556a;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%; flex-shrink: 0;
+  transition: background .3s;
+}
+.dot.green { background: #00d68f; box-shadow: 0 0 5px rgba(0,214,143,.5); }
+.dot.red { background: #3a3a4a; }
+.dot.yellow { background: #ffaa00; }
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #1e1e30;
+  background: #0e0e18;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.header h2 { font-size: 16px; font-weight: 600; color: #c8c8e0; }
+
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+/* Sections */
+.section { display: none; }
+.section.active { display: block; }
+
+/* Cards */
+.card {
+  background: #0e0e18;
+  border: 1px solid #1e1e30;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #55556a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.card-title svg { color: #6c5ce7; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+/* Stats */
+.stat-card {
+  background: #0e0e18;
+  border: 1px solid #1e1e30;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #8b7cf0;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: #33334a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+  border: none; outline: none; line-height: 1;
+}
+.btn svg { flex-shrink: 0; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-primary {
+  background: #6c5ce7;
+  color: white;
+}
+.btn-primary:hover:not(:disabled) { background: #7d6ff0; }
+
+.btn-success {
+  background: rgba(0,214,143,.1);
+  color: #00d68f;
+  border: 1px solid rgba(0,214,143,.2);
+}
+.btn-success:hover:not(:disabled) { background: rgba(0,214,143,.18); }
+
+.btn-danger {
+  background: rgba(255,92,92,.1);
+  color: #ff5c5c;
+  border: 1px solid rgba(255,92,92,.2);
+}
+.btn-danger:hover:not(:disabled) { background: rgba(255,92,92,.18); }
+
+.btn-ghost {
+  background: transparent;
+  color: #55556a;
+  border: 1px solid #1e1e30;
+}
+.btn-ghost:hover:not(:disabled) { background: #16162a; color: #a8a8c8; }
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Form */
+.form-group { margin-bottom: 12px; }
+.label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: #44445a; margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.input, .select, .textarea {
+  width: 100%;
+  padding: 8px 11px;
+  background: #0a0a0f;
+  border: 1px solid #1e1e30;
+  border-radius: 7px;
+  color: #c8c8e0;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+  font-family: inherit;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 2px rgba(108,92,231,.15);
+}
+.textarea { resize: vertical; min-height: 80px; }
+.select { appearance: none; cursor: pointer; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 9px 12px;
+  font-size: 10px; color: #33334a;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid #1e1e30;
+  font-weight: 600;
+}
+td {
+  padding: 9px 12px; font-size: 12px;
+  border-bottom: 1px solid rgba(30,30,48,.8);
+  color: #55556a;
+}
+tr:hover td { background: #0e0e18; color: #a8a8c8; }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.badge-new { background: rgba(0,180,216,.1); color: #00b4d8; }
+.badge-sent { background: rgba(108,92,231,.1); color: #8b7cf0; }
+.badge-replied { background: rgba(0,214,143,.1); color: #00d68f; }
+.badge-error { background: rgba(255,92,92,.1); color: #ff5c5c; }
+.badge-completed { background: rgba(0,214,143,.1); color: #00d68f; }
+.badge-form_sent { background: rgba(255,170,0,.1); color: #ffaa00; }
+
+/* Logs */
+.log-entry {
+  display: flex; gap: 10px; padding: 5px 8px;
+  font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px;
+  border-bottom: 1px solid rgba(30,30,48,.5);
+}
+.log-entry:hover { background: #0e0e18; }
+.log-time { color: #33334a; white-space: nowrap; min-width: 60px; }
+.log-src { font-weight: 600; min-width: 72px; }
+.log-msg { color: #55556a; flex: 1; word-break: break-word; }
+.log-INFO .log-src { color: #4488cc; }
+.log-WARN .log-src { color: #ffaa00; }
+.log-ERROR .log-src { color: #ff5c5c; }
+
+/* Step card */
+.step-card {
+  background: #0a0a0f;
+  border: 1px solid #1e1e30;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 2px solid #6c5ce7;
+}
+
+/* Hours bar */
+.hours-row { display: flex; align-items: center; gap: 10px; }
+.hours-bar {
+  flex: 1; height: 4px; background: #1e1e30;
+  border-radius: 2px; position: relative;
+}
+.hours-fill {
+  position: absolute; top: 0; bottom: 0;
+  background: #6c5ce7; border-radius: 2px;
+}
+
+/* Divider */
+.divider {
+  height: 1px; background: #1e1e30;
+  margin: 14px 0;
+}
+
+/* WA status */
+.wa-status-box {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  background: #0a0a0f;
+  border: 1px solid #1e1e30;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.wa-status-text { font-size: 13px; color: #a8a8c8; }
+
+/* Spinner */
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid #1e1e30;
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  display: inline-block; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Alert */
+.alert { padding: 10px 14px; border-radius: 7px; font-size: 12px; margin-bottom: 12px; }
+.alert-success { background: rgba(0,214,143,.08); border: 1px solid rgba(0,214,143,.2); color: #00d68f; }
+.alert-error { background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.2); color: #ff5c5c; }
+
+/* Empty */
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 48px 20px;
+  color: #33334a; text-align: center; gap: 10px;
+}
+.empty svg { opacity: .3; }
+.empty p { font-size: 13px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e1e30; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">ParserKolesa</div>
+      <div class="logo-sub">bot panel</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Главное</div>
+    <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+      <i data-lucide="layout-dashboard" width="15" height="15"></i> Дашборд
+    </button>
+    <button class="nav-item" onclick="showSection('parser')" id="nav-parser">
+      <i data-lucide="scan-search" width="15" height="15"></i> Парсер
+    </button>
+    <button class="nav-item" onclick="showSection('bot')" id="nav-bot">
+      <i data-lucide="bot" width="15" height="15"></i> Бот
+    </button>
+
+    <div class="nav-section">Данные</div>
+    <button class="nav-item" onclick="showSection('listings')" id="nav-listings">
+      <i data-lucide="database" width="15" height="15"></i> База номеров
+    </button>
+    <button class="nav-item" onclick="showSection('conversations')" id="nav-conversations">
+      <i data-lucide="message-square" width="15" height="15"></i> Диалоги
+    </button>
+
+    <div class="nav-section">Система</div>
+    <button class="nav-item" onclick="showSection('settings')" id="nav-settings">
+      <i data-lucide="settings" width="15" height="15"></i> Настройки
+    </button>
+    <button class="nav-item" onclick="showSection('logs')" id="nav-logs">
+      <i data-lucide="scroll-text" width="15" height="15"></i> Логи
+    </button>
+  </nav>
+
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="dot" id="wa-dot"></div>
+      <span id="wa-status-text">WhatsApp</span>
+    </div>
+    <div class="status-item">
+      <div class="dot" id="bot-dot"></div>
+      <span id="bot-status-text">Бот</span>
+    </div>
+    <div class="status-item">
+      <div class="dot" id="parser-dot"></div>
+      <span id="parser-status-text">Парсер</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="header">
+    <h2 id="page-title">Дашборд</h2>
+    <div style="display:flex;gap:8px" id="header-actions"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="grid-4" style="margin-bottom:16px">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Всего найдено</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-new">0</div>
+          <div class="stat-label">Новых</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-sent">0</div>
+          <div class="stat-label">Отправлено</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-replied">0</div>
+          <div class="stat-label">Ответили</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><i data-lucide="zap" width="13" height="13"></i> Быстрый запуск</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-success" id="btn-bot-toggle" onclick="toggleBot()">
+              <i data-lucide="play" width="13" height="13"></i> Запустить бота
+            </button>
+            <button class="btn btn-ghost" onclick="showSection('parser')">
+              <i data-lucide="scan-search" width="13" height="13"></i> Перейти к парсеру
+            </button>
+            <button class="btn btn-ghost" onclick="showSection('settings')">
+              <i data-lucide="settings" width="13" height="13"></i> Настройки
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i data-lucide="smartphone" width="13" height="13"></i> WhatsApp</div>
+          <div class="wa-status-box">
+            <div class="dot" id="wa-dot-main"></div>
+            <span class="wa-status-text" id="wa-info">Проверка...</span>
+          </div>
+          <div class="form-group">
+            <label class="label">Тест сообщение</label>
+            <div style="display:flex;gap:7px">
+              <input class="input" id="test-phone" placeholder="+77001234567">
+              <button class="btn btn-ghost btn-sm" onclick="sendTest()">
+                <i data-lucide="send" width="12" height="12"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="activity" width="13" height="13"></i> Последние логи</div>
+        <div id="dashboard-logs" style="max-height:180px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- PARSER -->
+    <div class="section" id="section-parser">
+      <div class="card">
+        <div class="card-title"><i data-lucide="scan-search" width="13" height="13"></i> Настройки парсера</div>
+        <div class="form-group">
+          <label class="label">URL страниц (по одному на строку)</label>
+          <textarea class="textarea" id="parser-urls" rows="4" placeholder="https://kolesa.kz/cars/almaty/
+https://kolesa.kz/cars/astana/"></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label">Макс. объявлений</label>
+            <input class="input" type="number" id="parser-max" value="50" min="1" max="500">
+          </div>
+          <div class="form-group">
+            <label class="label">Задержка (мс)</label>
+            <input class="input" type="number" id="parser-delay" value="3000" min="1000">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" id="btn-parser-start" onclick="startParser()">
+            <i data-lucide="play" width="13" height="13"></i> Запустить
+          </button>
+          <button class="btn btn-danger" id="btn-parser-stop" onclick="stopParser()" style="display:none">
+            <i data-lucide="square" width="13" height="13"></i> Остановить
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="bar-chart-2" width="13" height="13"></i> Статус</div>
+        <div id="parser-stats" style="color:#33334a;font-size:13px">Парсер не запущен</div>
+      </div>
+    </div>
+
+    <!-- BOT -->
+    <div class="section" id="section-bot">
+      <div class="card">
+        <div class="card-title"><i data-lucide="bot" width="13" height="13"></i> Управление ботом</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-success" id="btn-bot-start" onclick="startBot()">
+            <i data-lucide="play" width="13" height="13"></i> Запустить
+          </button>
+          <button class="btn btn-danger" id="btn-bot-stop" onclick="stopBot()" style="display:none">
+            <i data-lucide="square" width="13" height="13"></i> Остановить
+          </button>
+          <span id="bot-status-label" style="color:#33334a;font-size:12px">Бот остановлен</span>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-value" id="bot-sent">0</div>
+          <div class="stat-label">Отправлено сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="bot-replies">0</div>
+          <div class="stat-label">Ответов сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="bot-active">—</div>
+          <div class="stat-label">Статус</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTINGS -->
+    <div class="section" id="section-listings">
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="showAddModal()">
+            <i data-lucide="plus" width="12" height="12"></i> Добавить номер
+          </button>
+          <select class="select" id="listings-filter" onchange="loadListings()" style="width:140px">
+            <option value="">Все статусы</option>
+            <option value="NEW">Новые</option>
+            <option value="SENT">Отправлено</option>
+            <option value="REPLIED">Ответили</option>
+            <option value="FORM_SENT">Форма отправлена</option>
+            <option value="ERROR">Ошибка</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadListings()">
+            <i data-lucide="refresh-cw" width="12" height="12"></i>
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Авто</th>
+                <th>Телефон</th>
+                <th>Город</th>
+                <th>Цена</th>
+                <th>Статус</th>
+                <th>Добавлен</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="listings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONVERSATIONS -->
+    <div class="section" id="section-conversations">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:14px;height:calc(100vh - 100px)">
+        <div class="card" style="overflow-y:auto;padding:12px">
+          <div class="card-title"><i data-lucide="users" width="13" height="13"></i> Диалоги</div>
+          <div id="conv-list"></div>
+        </div>
+        <div class="card" style="overflow-y:auto;display:flex;flex-direction:column">
+          <div class="card-title" id="conv-title">
+            <i data-lucide="message-square" width="13" height="13"></i> Выберите диалог
+          </div>
+          <div id="conv-messages" style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="section-settings">
+      <div class="card">
+        <div class="card-title"><i data-lucide="smartphone" width="13" height="13"></i> Green API (WhatsApp)</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label">Instance ID</label>
+            <input class="input" id="green-instance" placeholder="7107608855">
+          </div>
+          <div class="form-group">
+            <label class="label">API Token</label>
+            <input class="input" type="password" id="green-token" placeholder="ваш токен">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost btn-sm" onclick="openQR()">
+            <i data-lucide="qr-code" width="12" height="12"></i> Открыть QR
+          </button>
+          <span style="font-size:11px;color:#33334a">Нажмите QR чтобы подключить/сменить номер WhatsApp</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="shield-check" width="13" height="13"></i> Тестовый режим (Whitelist)</div>
+        <div class="form-group">
+          <label class="label">Разрешённые номера (по одному на строку)</label>
+          <textarea class="textarea" id="whitelist" rows="4" placeholder="77001234567&#10;77009876543&#10;(если пусто — бот пишет всем)"></textarea>
+        </div>
+        <p style="font-size:11px;color:#33334a">Если список не пустой — бот будет писать ТОЛЬКО этим номерам. Оставьте пустым для обычного режима.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="cpu" width="13" height="13"></i> Настройки ИИ</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label">Провайдер</label>
+            <select class="select" id="ai-provider" onchange="updateModelList()">
+              <option value="openai">OpenAI (GPT)</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="deepseek">DeepSeek</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Модель</label>
+            <select class="select" id="ai-model"></select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="label">API Ключ</label>
+            <input class="input" type="password" id="ai-api-key" placeholder="sk-...">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="label">Системный промпт</label>
+            <textarea class="textarea" id="ai-prompt" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="message-circle" width="13" height="13"></i> Шаблоны сообщений</div>
+        <p style="font-size:11px;color:#33334a;margin-bottom:12px">Переменные: {car} — авто, {name} — имя, {formLink} — ссылка</p>
+        <div class="form-group">
+          <label class="label">Первое сообщение (удочка)</label>
+          <textarea class="textarea" id="first-message" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="label">Сообщение с формой</label>
+          <textarea class="textarea" id="form-message" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i data-lucide="shield" width="13" height="13"></i> Ограничения бота</div>
+        <div class="form-group">
+          <label class="label">Рабочие часы</label>
+          <div class="hours-row">
+            <select class="select" id="hours-start" onchange="updateHoursBar()" style="width:88px">
+              <script>for(let i=0;i<24;i++) document.write(`<option value="${i}">${String(i).padStart(2,'0')}:00</option>`)</script>
+            </select>
+            <div class="hours-bar"><div class="hours-fill" id="hours-fill"></div></div>
+            <select class="select" id="hours-end" onchange="updateHoursBar()" style="width:88px">
+              <script>for(let i=0;i<24;i++) document.write(`<option value="${i}">${String(i).padStart(2,'0')}:00</option>`)</script>
+            </select>
+          </div>
+          <p style="font-size:11px;color:#33334a;margin-top:6px" id="hours-label"></p>
+        </div>
+        <div class="grid-3">
+          <div class="form-group">
+            <label class="label">Удочек в день</label>
+            <input class="input" type="number" id="hooks-limit" value="100" min="1">
+          </div>
+          <div class="form-group">
+            <label class="label">Ответов в день</label>
+            <input class="input" type="number" id="outbound-limit" value="100" min="1">
+          </div>
+          <div class="form-group">
+            <label class="label">Задержка (сек)</label>
+            <input class="input" type="number" id="send-delay" value="45" min="5">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="card-title" style="margin:0"><i data-lucide="git-branch" width="13" height="13"></i> Скрипт диалога</div>
+          <button class="btn btn-ghost btn-sm" onclick="addScriptStep()">
+            <i data-lucide="plus" width="12" height="12"></i> Добавить шаг
+          </button>
+        </div>
+        <p style="font-size:11px;color:#33334a;margin-bottom:12px">Пошаговый сценарий. При отказе — бот дожимает через AI.</p>
+        <div id="script-steps"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary" onclick="saveSettings()">
+          <i data-lucide="save" width="13" height="13"></i> Сохранить
+        </button>
+      </div>
+      <div id="settings-alert" style="margin-top:10px"></div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="section" id="section-logs">
+      <div class="card">
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+          <select class="select" id="logs-filter" onchange="loadLogs()" style="width:130px">
+            <option value="">Все</option>
+            <option value="PARSER">Парсер</option>
+            <option value="BOT">Бот</option>
+            <option value="WHATSAPP">WhatsApp</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadLogs()">
+            <i data-lucide="refresh-cw" width="12" height="12"></i>
+          </button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#44445a;cursor:pointer">
+            <input type="checkbox" id="auto-refresh" onchange="toggleAutoRefresh()"> Авто
+          </label>
+        </div>
+        <div id="logs-container" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentSection = 'dashboard'
+let autoRefreshInterval = null
+let script = []
+
+const AI_MODELS = {
+  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
+  gemini: ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-pro'],
+  deepseek: ['deepseek-chat', 'deepseek-reasoner']
+}
+
+const TITLES = {
+  dashboard: 'Дашборд', parser: 'Парсер Kolesa.kz',
+  bot: 'Управление ботом', listings: 'База номеров',
+  conversations: 'Диалоги', settings: 'Настройки', logs: 'Логи'
+}
+
+const STEP_COLORS = {
+  greeting: '#6366f1', question: '#0ea5e9',
+  offer: '#10b981', form: '#f59e0b', objection: '#ef4444'
+}
+const STEP_LABELS = {
+  greeting: 'Приветствие', question: 'Вопрос',
+  offer: 'Предложение', form: 'Форма', objection: 'Возражение'
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.getElementById(`section-${name}`).classList.add('active')
+  const navEl = document.getElementById(`nav-${name}`)
+  if (navEl) navEl.classList.add('active')
+  document.getElementById('page-title').textContent = TITLES[name] || name
+  currentSection = name
+  if (name === 'listings') loadListings()
+  if (name === 'logs') loadLogs()
+  if (name === 'conversations') loadConversations()
+  if (name === 'settings') loadSettings()
+}
+
+// ─── API ──────────────────────────────────────────────────────────────────────
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } }
+  if (body) opts.body = JSON.stringify(body)
+  const res = await fetch(url, opts)
+  return res.json()
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await api('GET', '/api/listings/stats')
+    const s = r.stats || {}
+    document.getElementById('stat-total').textContent = s.total || 0
+    document.getElementById('stat-new').textContent = s.NEW || 0
+    document.getElementById('stat-sent').textContent = s.SENT || 0
+    document.getElementById('stat-replied').textContent = s.REPLIED || 0
+  } catch {}
+
+  try {
+    const r = await api('GET', '/api/whatsapp/status')
+    const state = r.status
+    const connected = state === 'authorized'
+    const dots = [document.getElementById('wa-dot'), document.getElementById('wa-dot-main')]
+    dots.forEach(d => { if(d) d.className = 'dot ' + (connected ? 'green' : 'red') })
+    document.getElementById('wa-status-text').textContent = connected ? 'WhatsApp' : 'Нет связи'
+    document.getElementById('wa-info').innerHTML = connected
+      ? '<span style="color:#00d68f">Подключён и готов к работе</span>'
+      : `<span style="color:#ff5c5c">Не авторизован — <a href="https://qr.green-api.com/waInstance${INSTANCE_ID}/${API_TOKEN}" target="_blank" style="color:#8b7cf0">подключить</a></span>`
+  } catch {}
+
+  try {
+    const r = await api('GET', '/api/bot/status')
+    updateBotUI(r.is_running)
+  } catch {}
+
+  try {
+    const r = await api('GET', '/api/logs?limit=15')
+    renderLogs(r.logs || [], 'dashboard-logs')
+  } catch {}
+}
+
+const INSTANCE_ID = '7107608855'
+const API_TOKEN = '50a2f19843404151b86f17175cf2e2c910ca899908834dcf98'
+
+// ─── Parser ───────────────────────────────────────────────────────────────────
+async function startParser() {
+  const urlsRaw = document.getElementById('parser-urls').value.trim()
+  if (!urlsRaw) return alert('Введите URL')
+  const urls = urlsRaw.split('\n').map(u => u.trim()).filter(Boolean)
+  const max_ads = parseInt(document.getElementById('parser-max').value) || 50
+  const delay_ms = parseInt(document.getElementById('parser-delay').value) || 3000
+  const r = await api('POST', '/api/parser/start', { urls, max_ads, delay_ms })
+  if (r.success) {
+    document.getElementById('btn-parser-start').style.display = 'none'
+    document.getElementById('btn-parser-stop').style.display = ''
+    document.getElementById('parser-dot').className = 'dot green'
+    document.getElementById('parser-status-text').textContent = 'Парсер работает'
+    pollParserStatus()
+  } else alert(r.detail || 'Ошибка')
+}
+
+async function stopParser() {
+  await api('POST', '/api/parser/stop')
+  document.getElementById('btn-parser-start').style.display = ''
+  document.getElementById('btn-parser-stop').style.display = 'none'
+  document.getElementById('parser-dot').className = 'dot red'
+  document.getElementById('parser-status-text').textContent = 'Парсер остановлен'
+}
+
+async function pollParserStatus() {
+  const r = await api('GET', '/api/parser/status')
+  const s = r.stats || {}
+  if (r.is_running) {
+    document.getElementById('parser-stats').innerHTML = `
+      <div class="grid-3" style="gap:10px;margin-bottom:10px">
+        <div class="stat-card"><div class="stat-value" style="font-size:22px">${s.new_added||0}</div><div class="stat-label">Добавлено</div></div>
+        <div class="stat-card"><div class="stat-value" style="font-size:22px">${s.pages_parsed||0}</div><div class="stat-label">Страниц</div></div>
+        <div class="stat-card"><div class="stat-value" style="font-size:22px">${s.total_found||0}</div><div class="stat-label">Обработано</div></div>
+      </div>
+      <p style="font-size:11px;color:#33334a">URL: ${s.current_url||'—'}</p>
+    `
+    setTimeout(pollParserStatus, 3000)
+  } else {
+    document.getElementById('btn-parser-start').style.display = ''
+    document.getElementById('btn-parser-stop').style.display = 'none'
+    document.getElementById('parser-dot').className = 'dot red'
+    document.getElementById('parser-status-text').textContent = 'Парсер остановлен'
+    document.getElementById('parser-stats').innerHTML =
+      `<p style="color:#00d68f;font-size:13px">✓ Готово. Добавлено: ${s.new_added||0}</p>`
+  }
+}
+
+// ─── Bot ──────────────────────────────────────────────────────────────────────
+async function startBot() {
+  const r = await api('POST', '/api/bot/start')
+  if (r.success) updateBotUI(true)
+  else alert(r.detail || 'Ошибка')
+}
+async function stopBot() {
+  await api('POST', '/api/bot/stop')
+  updateBotUI(false)
+}
+async function toggleBot() {
+  const r = await api('GET', '/api/bot/status')
+  if (r.is_running) await stopBot(); else await startBot()
+}
+
+function updateBotUI(running) {
+  const dot = document.getElementById('bot-dot')
+  const txt = document.getElementById('bot-status-text')
+  const lbl = document.getElementById('bot-status-label')
+  const s = document.getElementById('btn-bot-start')
+  const p = document.getElementById('btn-bot-stop')
+  const t = document.getElementById('btn-bot-toggle')
+
+  if (running) {
+    if(dot) { dot.className = 'dot green' }
+    if(txt) txt.textContent = 'Бот активен'
+    if(lbl) lbl.textContent = 'Бот работает'
+    if(s) s.style.display = 'none'
+    if(p) p.style.display = ''
+    if(t) t.innerHTML = '<i data-lucide="square" width="13" height="13"></i> Остановить бота'
+    if(t) { t.className = 'btn btn-danger'; lucide.createIcons() }
+    document.getElementById('bot-active').textContent = 'Активен'
+  } else {
+    if(dot) { dot.className = 'dot red' }
+    if(txt) txt.textContent = 'Бот остановлен'
+    if(lbl) lbl.textContent = 'Бот остановлен'
+    if(s) s.style.display = ''
+    if(p) p.style.display = 'none'
+    if(t) t.innerHTML = '<i data-lucide="play" width="13" height="13"></i> Запустить бота'
+    if(t) { t.className = 'btn btn-success'; lucide.createIcons() }
+    document.getElementById('bot-active').textContent = 'Стоп'
+  }
+}
+
+// ─── Listings ─────────────────────────────────────────────────────────────────
+async function loadListings() {
+  const status = document.getElementById('listings-filter').value
+  const r = await api('GET', `/api/listings?status=${status}&limit=200`)
+  const rows = (r.listings || []).map(l => `
+    <tr>
+      <td>${[l.car_brand,l.car_model,l.year].filter(Boolean).join(' ')||l.title?.substring(0,30)||'—'}</td>
+      <td style="font-family:monospace;font-size:11px;color:#8b7cf0">${l.phone||'—'}</td>
+      <td>${l.city||'—'}</td>
+      <td>${l.price||'—'}</td>
+      <td><span class="badge badge-${(l.status||'new').toLowerCase()}">${l.status||'NEW'}</span></td>
+      <td style="font-size:10px;color:#33334a">${toLocalFull(l.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+        ${l.status === 'NEW' ? `<button class="btn btn-ghost btn-sm" onclick="sendNow(${l.id}, '${l.phone_clean}')">
+          <i data-lucide="send" width="11" height="11"></i> Написать
+        </button>` : ''}
+        <button class="btn btn-sm" style="background:rgba(255,92,92,.08);color:#ff5c5c;border:1px solid rgba(255,92,92,.15)" onclick="deleteListing(${l.id}, '${l.phone}')">
+          <i data-lucide="trash-2" width="11" height="11"></i>
+        </button>
+      </div>
+      </td>
+    </tr>
+  `).join('')
+  document.getElementById('listings-tbody').innerHTML = rows ||
+    '<tr><td colspan="6"><div class="empty"><p>Нет данных</p></div></td></tr>'
+}
+
+// ─── Conversations ────────────────────────────────────────────────────────────
+async function loadConversations() {
+  const r = await api('GET', '/api/conversations?limit=50')
+  const convs = r.conversations || []
+  document.getElementById('conv-list').innerHTML = convs.length ? convs.map(c => `
+    <div onclick="loadMessages(${c.id},'${c.phone}')"
+      style="padding:10px 8px;border-bottom:1px solid #1e1e30;cursor:pointer;border-radius:6px;margin-bottom:2px"
+      onmouseover="this.style.background='#0e0e18'" onmouseout="this.style.background=''">
+      <div style="font-size:12px;font-weight:600;color:#a8a8c8">${c.phone}</div>
+      <div style="font-size:11px;color:#33334a;margin-top:2px">${[c.car_brand,c.car_model,c.year].filter(Boolean).join(' ')||''}</div>
+      <div style="font-size:11px;color:#44445a;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.last_message||''}</div>
+    </div>
+  `).join('') : '<div class="empty"><p>Нет диалогов</p></div>'
+}
+
+async function loadMessages(convId, phone) {
+  document.getElementById('conv-title').innerHTML =
+    `<i data-lucide="message-square" width="13" height="13"></i> ${phone}`
+  lucide.createIcons()
+  const r = await api('GET', `/api/conversations/${convId}/messages`)
+  const msgs = r.messages || []
+  document.getElementById('conv-messages').innerHTML = msgs.length ? msgs.map(m => {
+    const out = m.direction === 'OUTGOING'
+    return `
+      <div style="display:flex;justify-content:${out?'flex-end':'flex-start'}">
+        <div style="max-width:72%;padding:8px 12px;border-radius:${out?'12px 12px 3px 12px':'12px 12px 12px 3px'};background:${out?'#6c5ce7':'#0e0e18'};border:1px solid ${out?'transparent':'#1e1e30'};font-size:12px;line-height:1.5;color:${out?'white':'#a8a8c8'}">
+          ${m.content}
+          <div style="font-size:9px;opacity:.5;margin-top:3px;text-align:right">${toLocal(m.created_at)}</div>
+        </div>
+      </div>
+    `
+  }).join('') : '<div class="empty"><p>Нет сообщений</p></div>'
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const r = await api('GET', '/api/settings')
+  const s = r.settings || {}
+  document.getElementById('green-instance').value = s.green_api_instance_id || ''
+  document.getElementById('green-instance').value = s.green_api_instance_id || ''
+  document.getElementById('green-token').value = s.green_api_token || ''
+  const wl = s.whitelist || []
+  document.getElementById('whitelist').value = wl.join('\n')
+  document.getElementById('ai-provider').value = s.ai_provider || 'openai'
+  updateModelList()
+  document.getElementById('ai-model').value = s.ai_model || 'gpt-4o'
+  document.getElementById('ai-api-key').value = s.ai_api_key || ''
+  document.getElementById('ai-prompt').value = s.ai_prompt || 'Ты — менеджер по продажам автомобильных ковриков. Будь дружелюбным, отвечай коротко.'
+  document.getElementById('first-message').value = s.first_message || 'Здравствуйте! 👋 Увидел ваше объявление на Kolesa.kz. Хотел предложить качественные автомобильные коврики для вашего {car}. Интересно?'
+  document.getElementById('form-message').value = s.form_message || 'Отлично! Заполните форму для оформления заказа: {formLink}'
+  document.getElementById('hours-start').value = s.working_hours_start ?? 9
+  document.getElementById('hours-end').value = s.working_hours_end ?? 21
+  document.getElementById('hooks-limit').value = s.daily_hooks_limit ?? 100
+  document.getElementById('outbound-limit').value = s.daily_outbound_limit ?? 100
+  document.getElementById('send-delay').value = s.send_delay ?? 45
+  script = s.conversation_script || []
+  renderScript()
+  updateHoursBar()
+}
+
+async function saveSettings() {
+  const data = {
+    ai_provider: document.getElementById('ai-provider').value,
+    ai_model: document.getElementById('ai-model').value,
+    ai_api_key: document.getElementById('ai-api-key').value,
+    ai_prompt: document.getElementById('ai-prompt').value,
+    first_message: document.getElementById('first-message').value,
+    form_message: document.getElementById('form-message').value,
+    working_hours_start: parseInt(document.getElementById('hours-start').value),
+    working_hours_end: parseInt(document.getElementById('hours-end').value),
+    daily_hooks_limit: parseInt(document.getElementById('hooks-limit').value),
+    daily_outbound_limit: parseInt(document.getElementById('outbound-limit').value),
+    send_delay: parseInt(document.getElementById('send-delay').value),
+    conversation_script: script,
+    green_api_instance_id: document.getElementById('green-instance').value,
+    green_api_token: document.getElementById('green-token').value,
+    whitelist: document.getElementById('whitelist').value.split('\n').map(s=>s.trim().replace(/\D/g,'')).filter(Boolean)
+  }
+  const r = await api('PUT', '/api/settings', data)
+  const el = document.getElementById('settings-alert')
+  el.innerHTML = r.success
+    ? '<div class="alert alert-success">Настройки сохранены</div>'
+    : '<div class="alert alert-error">Ошибка сохранения</div>'
+  setTimeout(() => el.innerHTML = '', 3000)
+}
+
+function updateModelList() {
+  const p = document.getElementById('ai-provider').value
+  document.getElementById('ai-model').innerHTML =
+    (AI_MODELS[p]||[]).map(m=>`<option value="${m}">${m}</option>`).join('')
+}
+
+function updateHoursBar() {
+  const s = parseInt(document.getElementById('hours-start').value)
+  const e = parseInt(document.getElementById('hours-end').value)
+  const f = document.getElementById('hours-fill')
+  f.style.left = `${(s/24)*100}%`
+  f.style.right = `${((24-e)/24)*100}%`
+  document.getElementById('hours-label').textContent =
+    `Бот работает с ${String(s).padStart(2,'0')}:00 до ${String(e).padStart(2,'0')}:00`
+}
+
+// ─── Script ───────────────────────────────────────────────────────────────────
+function renderScript() {
+  document.getElementById('script-steps').innerHTML = script.map((step,i) => `
+    <div class="step-card" style="border-left-color:${STEP_COLORS[step.type]||'#6c5ce7'}">
+      <div style="display:flex;gap:7px;align-items:center;margin-bottom:9px;flex-wrap:wrap">
+        <span style="font-size:10px;font-weight:700;color:${STEP_COLORS[step.type]};background:${STEP_COLORS[step.type]}18;padding:2px 7px;border-radius:3px">
+          #${step.order} ${STEP_LABELS[step.type]||step.type}
+        </span>
+        <select onchange="updateStep(${i},'type',this.value);renderScript()" style="background:#0a0a0f;border:1px solid #1e1e30;border-radius:5px;color:#a8a8c8;padding:3px 7px;font-size:11px">
+          ${Object.entries(STEP_LABELS).map(([v,l])=>`<option value="${v}"${step.type===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+        <div style="margin-left:auto;display:flex;gap:3px">
+          <button onclick="moveStep(${i},-1)" style="background:none;border:none;color:#33334a;cursor:pointer;padding:3px" ${i===0?'disabled':''}>↑</button>
+          <button onclick="moveStep(${i},1)" style="background:none;border:none;color:#33334a;cursor:pointer;padding:3px" ${i===script.length-1?'disabled':''}>↓</button>
+          <button onclick="removeStep(${i})" style="background:none;border:none;color:#ff5c5c;cursor:pointer;padding:3px">✕</button>
+        </div>
+      </div>
+      <textarea oninput="updateStep(${i},'message',this.value)"
+        style="width:100%;background:#0a0a0f;border:1px solid #1e1e30;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:55px;font-family:inherit"
+        placeholder="Текст сообщения...">${step.message||''}</textarea>
+      ${step.type==='objection'?`<textarea oninput="updateStep(${i},'objection_reply',this.value)"
+        style="width:100%;background:#0a0a0f;border:1px solid #1e1e30;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:45px;font-family:inherit;margin-top:6px"
+        placeholder="Ответ на возражение...">${step.objection_reply||''}</textarea>`:''}
+    </div>
+  `).join('')
+}
+
+function addScriptStep() {
+  script.push({id:`step-${Date.now()}`,order:script.length+1,type:'question',message:'',objection_reply:''})
+  renderScript()
+}
+function removeStep(i) { script.splice(i,1); script.forEach((s,j)=>s.order=j+1); renderScript() }
+function updateStep(i,f,v) { script[i][f]=v }
+function moveStep(i,d) {
+  const j=i+d
+  if(j<0||j>=script.length) return
+  ;[script[i],script[j]]=[script[j],script[i]]
+  script.forEach((s,k)=>s.order=k+1)
+  renderScript()
+}
+
+// ─── Logs ─────────────────────────────────────────────────────────────────────
+async function loadLogs() {
+  const src = document.getElementById('logs-filter')?.value || ''
+  const r = await api('GET', `/api/logs?limit=200&source=${src}`)
+  renderLogs(r.logs||[], 'logs-container')
+}
+function renderLogs(logs, id) {
+  const el = document.getElementById(id)
+  if(!el) return
+  el.innerHTML = logs.map(l=>`
+    <div class="log-entry log-${l.level}">
+      <span class="log-time">${toLocal(l.created_at)}</span>
+      <span class="log-src">${l.source||''}</span>
+      <span class="log-msg">${l.message||''}</span>
+    </div>
+  `).join('') || '<div class="empty"><p>Нет логов</p></div>'
+}
+function toggleAutoRefresh() {
+  if(document.getElementById('auto-refresh').checked)
+    autoRefreshInterval = setInterval(loadLogs, 3000)
+  else clearInterval(autoRefreshInterval)
+}
+
+// ─── Green API ─────────────────────────────────────────────────────────────────
+async function openQR() {
+  const r = await api('GET', '/api/whatsapp/qr')
+  if (r.qr_link) window.open(r.qr_link, '_blank')
+}
+
+// ─── Test ─────────────────────────────────────────────────────────────────────
+async function sendTest() {
+  const phone = document.getElementById('test-phone').value.trim()
+  if(!phone) return alert('Введите номер')
+  const r = await api('POST', '/api/whatsapp/test', {phone})
+  alert(r.success ? '✓ Отправлено!' : '✗ Ошибка: ' + JSON.stringify(r))
+}
+
+// ─── Time ────────────────────────────────────────────────────────────────────
+function toLocal(utcStr) {
+  if (!utcStr) return ''
+  // SQLite stores UTC, Astana is UTC+5
+  const d = new Date(utcStr.replace(' ', 'T') + 'Z')
+  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Almaty' })
+}
+function toLocalFull(utcStr) {
+  if (!utcStr) return ''
+  const d = new Date(utcStr.replace(' ', 'T') + 'Z')
+  return d.toLocaleString('ru-RU', { timeZone: 'Asia/Almaty', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+// ─── Delete Listing ──────────────────────────────────────────────────────────
+async function deleteListing(id, phone) {
+  if (!confirm(`Удалить ${phone} из базы?`)) return
+  const r = await api('DELETE', `/api/listings/${id}`)
+  if (r.success) {
+    loadListings()
+  } else {
+    alert('Ошибка: ' + (r.detail || 'Неизвестная ошибка'))
+  }
+}
+
+// ─── Send Now ────────────────────────────────────────────────────────────────
+async function sendNow(listingId, phone) {
+  if (!confirm(`Написать сейчас: +${phone}?`)) return
+  const r = await api('POST', '/api/listings/send-now', { listing_id: listingId })
+  if (r.success) {
+    alert('✓ Сообщение отправлено!')
+    loadListings()
+  } else {
+    alert('✗ Ошибка: ' + (r.detail || r.error || 'Неизвестная ошибка'))
+  }
+}
+
+// ─── Manual Add ──────────────────────────────────────────────────────────────
+function showAddModal() {
+  const m = document.getElementById('add-modal')
+  m.style.display = 'flex'
+  lucide.createIcons()
+}
+
+function hideAddModal() {
+  document.getElementById('add-modal').style.display = 'none'
+  document.getElementById('add-alert').innerHTML = ''
+  ;['add-phone','add-brand','add-model','add-year','add-city','add-price'].forEach(id => {
+    document.getElementById(id).value = ''
+  })
+}
+
+async function addNumber() {
+  const phone = document.getElementById('add-phone').value.trim()
+  if (!phone) {
+    document.getElementById('add-alert').innerHTML = '<div class="alert alert-error">Введите номер телефона</div>'
+    return
+  }
+
+  const data = {
+    phone: phone,
+    car_brand: document.getElementById('add-brand').value.trim(),
+    car_model: document.getElementById('add-model').value.trim(),
+    year: parseInt(document.getElementById('add-year').value) || null,
+    city: document.getElementById('add-city').value.trim(),
+    price: document.getElementById('add-price').value.trim()
+  }
+
+  const r = await api('POST', '/api/listings/add', data)
+  if (r.success) {
+    document.getElementById('add-alert').innerHTML = '<div class="alert alert-success">✓ Номер добавлен, бот напишет при следующем цикле</div>'
+    loadListings()
+    setTimeout(hideAddModal, 1500)
+  } else {
+    document.getElementById('add-alert').innerHTML = '<div class="alert alert-error">' + (r.detail || r.error || 'Ошибка') + '</div>'
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons()
+  loadDashboard()
+  setInterval(loadDashboard, 10000)
+})
+</script>
+
+<!-- Add Number Modal -->
+<div id="add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center">
+  <div style="background:#0e0e18;border:1px solid #1e1e30;border-radius:12px;padding:24px;width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <span style="font-size:14px;font-weight:600;color:#c8c8e0">Добавить номер вручную</span>
+      <button onclick="hideAddModal()" style="background:none;border:none;color:#55556a;cursor:pointer">
+        <i data-lucide="x" width="16" height="16"></i>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="label">Номер телефона *</label>
+      <input class="input" id="add-phone" placeholder="+77001234567">
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="label">Марка авто</label>
+        <input class="input" id="add-brand" placeholder="Toyota">
+      </div>
+      <div class="form-group">
+        <label class="label">Модель</label>
+        <input class="input" id="add-model" placeholder="Camry">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="label">Год</label>
+        <input class="input" id="add-year" type="number" placeholder="2020">
+      </div>
+      <div class="form-group">
+        <label class="label">Город</label>
+        <input class="input" id="add-city" placeholder="Алматы">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="label">Цена</label>
+      <input class="input" id="add-price" placeholder="5 000 000 тг">
+    </div>
+    <div id="add-alert" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="hideAddModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="addNumber()">
+        <i data-lucide="plus" width="13" height="13"></i> Добавить
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
