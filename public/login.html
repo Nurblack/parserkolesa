@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParserKolesa — Вход</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0f;
+  color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.login-box {
+  background: #0e0e18;
+  border: 1px solid #1e1e30;
+  border-radius: 14px;
+  padding: 40px;
+  width: 380px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #6c5ce7, #a78bfa);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-text { font-size: 18px; font-weight: 700; }
+.logo-sub { font-size: 11px; color: #55556a; }
+.form-group { margin-bottom: 16px; }
+.label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: #44445a; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.input {
+  width: 100%; padding: 10px 12px;
+  background: #0a0a0f;
+  border: 1px solid #1e1e30;
+  border-radius: 8px;
+  color: #e8e8f0; font-size: 14px;
+  outline: none; transition: border-color .15s;
+  font-family: inherit;
+}
+.input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 2px rgba(108,92,231,.15); }
+.btn {
+  width: 100%; padding: 11px;
+  background: #6c5ce7; color: white;
+  border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background .15s;
+  margin-top: 8px;
+}
+.btn:hover { background: #7d6ff0; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.error {
+  background: rgba(255,92,92,.08);
+  border: 1px solid rgba(255,92,92,.2);
+  color: #ff5c5c;
+  padding: 10px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">ParserKolesa</div>
+      <div class="logo-sub">bot panel</div>
+    </div>
+  </div>
+
+  <div class="error" id="error-msg"></div>
+
+  <div class="form-group">
+    <label class="label">Логин</label>
+    <input class="input" id="username" type="text" placeholder="admin" autocomplete="username">
+  </div>
+  <div class="form-group">
+    <label class="label">Пароль</label>
+    <input class="input" id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="btn" id="login-btn" onclick="doLogin()">Войти</button>
+</div>
+
+<script>
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin()
+})
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim()
+  const password = document.getElementById('password').value
+  const btn = document.getElementById('login-btn')
+  const err = document.getElementById('error-msg')
+
+  if (!username || !password) {
+    err.textContent = 'Введите логин и пароль'
+    err.style.display = 'block'
+    return
+  }
+
+  btn.disabled = true
+  btn.textContent = 'Вход...'
+  err.style.display = 'none'
+
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+
+    if (r.ok) {
+      const data = await r.json()
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('role', data.role)
+      localStorage.setItem('username', data.username)
+      window.location.href = '/'
+    } else {
+      err.textContent = 'Неверный логин или пароль'
+      err.style.display = 'block'
+      btn.disabled = false
+      btn.textContent = 'Войти'
+    }
+  } catch {
+    err.textContent = 'Ошибка соединения'
+    err.style.display = 'block'
+    btn.disabled = false
+    btn.textContent = 'Войти'
+  }
+}
+</script>
+</body>
+</html>

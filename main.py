@@ -2,9 +2,9 @@ import asyncio
 import json
 import os
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request, Depends
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
@@ -16,15 +16,55 @@ from database import db
 from whatsapp import wa
 from parser import parser
 from bot import bot
+from auth import login, verify_token
 
 app = FastAPI(title="ParserKolesa")
 app.mount("/static", StaticFiles(directory="public"), name="static")
+
+# ─── Auth helpers ─────────────────────────────────────────────────────────────
+
+def get_current_user(request: Request) -> dict:
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    if not token:
+        token = request.cookies.get('token', '')
+    user = verify_token(token)
+    if not user:
+        raise HTTPException(401, 'Не авторизован')
+    return user
+
+def require_admin(request: Request) -> dict:
+    user = get_current_user(request)
+    if user.get('role') != 'admin':
+        raise HTTPException(403, 'Нет доступа')
+    return user
 
 # ─── Root ─────────────────────────────────────────────────────────────────────
 
 @app.get("/")
 async def root():
     return FileResponse("public/index.html")
+
+@app.get("/login")
+async def login_page():
+    return FileResponse("public/login.html")
+
+# ─── Auth ─────────────────────────────────────────────────────────────────────
+
+class LoginModel(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/auth/login")
+async def auth_login(data: LoginModel):
+    result = login(data.username, data.password)
+    if not result:
+        raise HTTPException(401, 'Неверный логин или пароль')
+    return result
+
+@app.get("/api/auth/me")
+async def auth_me(request: Request):
+    user = get_current_user(request)
+    return user
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
 
@@ -46,27 +86,32 @@ class SettingsModel(BaseModel):
     whitelist: list = []
 
 @app.get("/api/settings")
-async def get_settings():
+async def get_settings(request: Request):
+    get_current_user(request)
     return {"settings": db.get_settings()}
 
 @app.put("/api/settings")
-async def save_settings(data: SettingsModel):
+async def save_settings(data: SettingsModel, request: Request):
+    require_admin(request)
     db.save_settings(data.dict())
     return {"success": True}
 
 # ─── WhatsApp ─────────────────────────────────────────────────────────────────
 
 @app.get("/api/whatsapp/status")
-async def whatsapp_status():
+async def whatsapp_status(request: Request):
+    get_current_user(request)
     status = await wa.get_status()
     return {"status": status}
 
 @app.get("/api/whatsapp/qr")
-async def whatsapp_qr():
+async def whatsapp_qr(request: Request):
+    require_admin(request)
     return {"qr_link": wa.get_qr_link()}
 
 @app.post("/api/whatsapp/test")
-async def whatsapp_test(data: dict):
+async def whatsapp_test(data: dict, request: Request):
+    require_admin(request)
     phone = data.get("phone", "").replace("+", "").replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
     if not phone:
         raise HTTPException(400, "Номер обязателен")
@@ -81,45 +126,40 @@ class ParserStartModel(BaseModel):
     delay_ms: int = 3000
 
 @app.post("/api/parser/start")
-async def parser_start(data: ParserStartModel):
+async def parser_start(data: ParserStartModel, request: Request):
+    get_current_user(request)
     if parser.is_running:
         raise HTTPException(400, "Парсер уже запущен")
     job_id = db.create_parser_job({"urls": data.urls, "max_ads": data.max_ads})
-    # Запускаем в отдельном потоке — решает проблему Windows + asyncio
     parser.start_in_thread(job_id, data.urls, data.max_ads, data.delay_ms)
     return {"success": True, "job_id": job_id}
 
 @app.post("/api/parser/stop")
-async def parser_stop():
+async def parser_stop(request: Request):
+    get_current_user(request)
     parser.stop()
     return {"success": True}
 
 @app.get("/api/parser/status")
-async def parser_status():
+async def parser_status(request: Request):
+    get_current_user(request)
     return {"is_running": parser.is_running, "stats": parser.stats}
 
 # ─── Listings ─────────────────────────────────────────────────────────────────
 
 @app.get("/api/listings")
-async def get_listings(status: str = "", limit: int = 200):
+async def get_listings(request: Request, status: str = "", limit: int = 200):
+    require_admin(request)
     return {"listings": db.get_listings(status=status, limit=limit)}
 
 @app.get("/api/listings/stats")
-async def get_listing_stats():
+async def get_listing_stats(request: Request):
+    get_current_user(request)
     return {"stats": db.get_listing_stats()}
 
-# ─── Manual listing add ───────────────────────────────────────────────────────
-
-class ManualListingModel(BaseModel):
-    phone: str
-    car_brand: str = ''
-    car_model: str = ''
-    year: Optional[int] = None
-    city: str = ''
-    price: str = ''
-
-@app.delete('/api/listings/{listing_id}')
-async def delete_listing(listing_id: int):
+@app.delete("/api/listings/{listing_id}")
+async def delete_listing(listing_id: int, request: Request):
+    require_admin(request)
     listing = db.get_listing_by_id(listing_id)
     if not listing:
         raise HTTPException(404, 'Номер не найден')
@@ -130,31 +170,36 @@ async def delete_listing(listing_id: int):
     return {'success': True}
 
 @app.post('/api/listings/send-now')
-async def send_now(data: dict, background_tasks: BackgroundTasks):
+async def send_now(data: dict, background_tasks: BackgroundTasks, request: Request):
+    require_admin(request)
     listing_id = data.get('listing_id')
     if not listing_id:
         raise HTTPException(400, 'listing_id обязателен')
-
     listing = db.get_listing_by_id(listing_id)
     if not listing:
         raise HTTPException(404, 'Номер не найден')
-
     if listing['status'] != 'NEW':
-        raise HTTPException(400, f'Статус номера: {listing["status"]}. Написать можно только NEW номерам.')
-
+        raise HTTPException(400, f'Статус: {listing["status"]}')
     settings = db.get_settings()
     background_tasks.add_task(bot._send_hook, listing, settings)
     return {'success': True}
 
+class ManualListingModel(BaseModel):
+    phone: str
+    car_brand: str = ''
+    car_model: str = ''
+    year: Optional[int] = None
+    city: str = ''
+    price: str = ''
+
 @app.post('/api/listings/add')
-async def add_listing_manual(data: ManualListingModel):
-    # Normalize phone
+async def add_listing_manual(data: ManualListingModel, request: Request):
+    require_admin(request)
     clean = data.phone.replace('+','').replace(' ','').replace('-','').replace('(','').replace(')','')
     if clean.startswith('8') and len(clean) == 11:
         clean = '7' + clean[1:]
     if not clean.startswith('7') or len(clean) != 11:
-        raise HTTPException(400, 'Неверный формат номера. Пример: +77001234567')
-
+        raise HTTPException(400, 'Неверный формат номера')
     listing_id = db.save_listing({
         'source_url': 'manual',
         'title': ' '.join(filter(None, [data.car_brand, data.car_model, str(data.year or '')])),
@@ -167,45 +212,49 @@ async def add_listing_manual(data: ManualListingModel):
         'phone_clean': clean,
         'parser_job_id': None
     })
-
     if listing_id is None:
         raise HTTPException(400, 'Этот номер уже есть в базе')
-
     db.log('INFO', 'BOT', f'Номер добавлен вручную: +{clean}')
     return {'success': True, 'id': listing_id}
 
 # ─── Bot ──────────────────────────────────────────────────────────────────────
 
 @app.post("/api/bot/start")
-async def bot_start(background_tasks: BackgroundTasks):
+async def bot_start(background_tasks: BackgroundTasks, request: Request):
+    get_current_user(request)
     if bot.is_running:
         raise HTTPException(400, "Бот уже запущен")
     background_tasks.add_task(bot.start)
     return {"success": True}
 
 @app.post("/api/bot/stop")
-async def bot_stop():
+async def bot_stop(request: Request):
+    get_current_user(request)
     bot.stop()
     return {"success": True}
 
 @app.get("/api/bot/status")
-async def bot_status():
+async def bot_status(request: Request):
+    get_current_user(request)
     return {"is_running": bot.is_running, "stats": bot.stats}
 
 # ─── Conversations ────────────────────────────────────────────────────────────
 
 @app.get("/api/conversations")
-async def get_conversations(limit: int = 50):
+async def get_conversations(request: Request, limit: int = 50):
+    get_current_user(request)
     return {"conversations": db.get_conversations(limit=limit)}
 
 @app.get("/api/conversations/{conv_id}/messages")
-async def get_messages(conv_id: int):
+async def get_messages(conv_id: int, request: Request):
+    get_current_user(request)
     return {"messages": db.get_messages(conv_id)}
 
 # ─── Logs ─────────────────────────────────────────────────────────────────────
 
 @app.get("/api/logs")
-async def get_logs(limit: int = 200, source: str = ""):
+async def get_logs(request: Request, limit: int = 200, source: str = ""):
+    require_admin(request)
     return {"logs": db.get_logs(limit=limit, source=source)}
 
 # ─── Webhook ──────────────────────────────────────────────────────────────────

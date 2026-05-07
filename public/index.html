@@ -368,7 +368,7 @@ tr:hover td { background: #0e0e18; color: #a8a8c8; }
     </button>
 
     <div class="nav-section">Данные</div>
-    <button class="nav-item" onclick="showSection('listings')" id="nav-listings">
+    <button class="nav-item admin-only" onclick="showSection('listings')" id="nav-listings">
       <i data-lucide="database" width="15" height="15"></i> База номеров
     </button>
     <button class="nav-item" onclick="showSection('conversations')" id="nav-conversations">
@@ -376,10 +376,10 @@ tr:hover td { background: #0e0e18; color: #a8a8c8; }
     </button>
 
     <div class="nav-section">Система</div>
-    <button class="nav-item" onclick="showSection('settings')" id="nav-settings">
+    <button class="nav-item admin-only" onclick="showSection('settings')" id="nav-settings">
       <i data-lucide="settings" width="15" height="15"></i> Настройки
     </button>
-    <button class="nav-item" onclick="showSection('logs')" id="nav-logs">
+    <button class="nav-item admin-only" onclick="showSection('logs')" id="nav-logs">
       <i data-lucide="scroll-text" width="15" height="15"></i> Логи
     </button>
   </nav>
@@ -404,7 +404,10 @@ tr:hover td { background: #0e0e18; color: #a8a8c8; }
 <div class="main">
   <div class="header">
     <h2 id="page-title">Дашборд</h2>
-    <div style="display:flex;gap:8px" id="header-actions"></div>
+    <div style="display:flex;gap:8px;align-items:center" id="header-actions">
+    <span style="font-size:12px;color:#55556a">👤 <span id="username-label"></span></span>
+    <button onclick="logout()" style="background:none;border:1px solid #1e1e30;color:#55556a;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">Выйти</button>
+  </div>
   </div>
 
   <div class="content">
@@ -777,7 +780,7 @@ function showSection(name) {
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 async function api(method, url, body) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } }
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } }
   if (body) opts.body = JSON.stringify(body)
   const res = await fetch(url, opts)
   return res.json()
@@ -1197,8 +1200,46 @@ async function addNumber() {
   }
 }
 
+// ─── Auth ────────────────────────────────────────────────────────────────────
+const token = localStorage.getItem('token')
+const role = localStorage.getItem('role')
+const username = localStorage.getItem('username')
+
+if (!token) {
+  window.location.href = '/login'
+}
+
+async function checkAuth() {
+  try {
+    const r = await fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    if (!r.ok) {
+      localStorage.clear()
+      window.location.href = '/login'
+    }
+  } catch {
+    window.location.href = '/login'
+  }
+}
+
+function logout() {
+  localStorage.clear()
+  window.location.href = '/login'
+}
+
+function applyRoleUI() {
+  if (role !== 'admin') {
+    const adminOnly = document.querySelectorAll('.admin-only')
+    adminOnly.forEach(el => el.style.display = 'none')
+  }
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  checkAuth()
+  document.getElementById('username-label').textContent = username || ''
+  applyRoleUI()
   lucide.createIcons()
   loadDashboard()
   setInterval(loadDashboard, 10000)
