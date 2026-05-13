@@ -8,8 +8,8 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: #0a0a0f;
-  color: #e8e8f0;
+  background: #f5f6fa;
+  color: #1e1e2e;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   align-items: center;
@@ -17,16 +17,15 @@ body {
   min-height: 100vh;
 }
 .login-box {
-  background: #0e0e18;
-  border: 1px solid #1e1e30;
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
   border-radius: 14px;
   padding: 40px;
   width: 380px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.08);
 }
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   margin-bottom: 32px;
 }
 .logo-icon {
@@ -35,24 +34,24 @@ body {
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
 }
-.logo-text { font-size: 18px; font-weight: 700; }
-.logo-sub { font-size: 11px; color: #55556a; }
+.logo-text { font-size: 18px; font-weight: 700; color: #1e1e2e; }
+.logo-sub { font-size: 11px; color: #9ca3af; }
 .form-group { margin-bottom: 16px; }
 .label {
   display: block; font-size: 11px; font-weight: 600;
-  color: #44445a; margin-bottom: 6px;
+  color: #9ca3af; margin-bottom: 6px;
   text-transform: uppercase; letter-spacing: 0.4px;
 }
 .input {
   width: 100%; padding: 10px 12px;
-  background: #0a0a0f;
-  border: 1px solid #1e1e30;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  color: #e8e8f0; font-size: 14px;
+  color: #1e1e2e; font-size: 14px;
   outline: none; transition: border-color .15s;
   font-family: inherit;
 }
-.input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 2px rgba(108,92,231,.15); }
+.input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 2px rgba(108,92,231,.1); background: #fff; }
 .btn {
   width: 100%; padding: 11px;
   background: #6c5ce7; color: white;
@@ -61,12 +60,12 @@ body {
   cursor: pointer; transition: background .15s;
   margin-top: 8px;
 }
-.btn:hover { background: #7d6ff0; }
+.btn:hover { background: #5b4bd6; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .error {
-  background: rgba(255,92,92,.08);
-  border: 1px solid rgba(255,92,92,.2);
-  color: #ff5c5c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   padding: 10px 14px;
   border-radius: 7px;
   font-size: 13px;

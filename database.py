@@ -9,6 +9,9 @@ ASTANA_TZ = timezone(timedelta(hours=5))
 def now_local():
     return datetime.now(ASTANA_TZ).strftime('%Y-%m-%d %H:%M:%S')
 
+# SQLite datetime offset для Астаны (+5 часов)
+SQLITE_NOW = "datetime('now', '+5 hours')"
+
 
 class Database:
     def __init__(self):
@@ -39,7 +42,11 @@ class Database:
                     phone_clean TEXT UNIQUE,
                     status TEXT DEFAULT 'NEW',
                     parser_job_id INTEGER,
-                    created_at TEXT DEFAULT (datetime('now'))
+                    created_at TEXT DEFAULT (datetime('now', '+5 hours')),
+                    script_step INTEGER DEFAULT 0,
+                    ai_attempts INTEGER DEFAULT 0,
+                    followup_count INTEGER DEFAULT 0,
+                    last_contact TEXT
                 );
                 CREATE TABLE IF NOT EXISTS conversations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +55,7 @@ class Database:
                     status TEXT DEFAULT 'ACTIVE',
                     current_step INTEGER DEFAULT 0,
                     ai_context TEXT DEFAULT '{}',
-                    created_at TEXT DEFAULT (datetime('now')),
+                    created_at TEXT DEFAULT (datetime('now', '+5 hours')),
                     last_message_at TEXT
                 );
                 CREATE TABLE IF NOT EXISTS messages (
@@ -57,7 +64,7 @@ class Database:
                     content TEXT,
                     direction TEXT,
                     is_ai INTEGER DEFAULT 0,
-                    created_at TEXT DEFAULT (datetime('now'))
+                    created_at TEXT DEFAULT (datetime('now', '+5 hours'))
                 );
                 CREATE TABLE IF NOT EXISTS parser_jobs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +72,7 @@ class Database:
                     status TEXT DEFAULT 'RUNNING',
                     new_added INTEGER DEFAULT 0,
                     pages_parsed INTEGER DEFAULT 0,
-                    created_at TEXT DEFAULT (datetime('now')),
+                    created_at TEXT DEFAULT (datetime('now', '+5 hours')),
                     finished_at TEXT
                 );
                 CREATE TABLE IF NOT EXISTS logs (
@@ -73,10 +80,27 @@ class Database:
                     level TEXT DEFAULT 'INFO',
                     source TEXT,
                     message TEXT,
-                    created_at TEXT DEFAULT (datetime('now'))
+                    created_at TEXT DEFAULT (datetime('now', '+5 hours'))
                 );
                 INSERT OR IGNORE INTO settings (id, data) VALUES (1, '{}');
             """)
+            # Миграция: добавляем недостающие колонки в listings
+            try:
+                c.execute("ALTER TABLE listings ADD COLUMN script_step INTEGER DEFAULT 0")
+            except:
+                pass
+            try:
+                c.execute("ALTER TABLE listings ADD COLUMN ai_attempts INTEGER DEFAULT 0")
+            except:
+                pass
+            try:
+                c.execute("ALTER TABLE listings ADD COLUMN followup_count INTEGER DEFAULT 0")
+            except:
+                pass
+            try:
+                c.execute("ALTER TABLE listings ADD COLUMN last_contact TEXT")
+            except:
+                pass
 
     # ── Settings ──────────────────────────────────────────────────────────────
 
@@ -146,9 +170,82 @@ class Database:
             row = c.execute('SELECT * FROM listings WHERE id=?', (listing_id,)).fetchone()
             return dict(row) if row else None
 
-    def update_listing_status(self, listing_id: int, status: str):
+    def get_listing_by_phone(self, phone_clean: str) -> Optional[dict]:
+        """Поиск листинга по очищенному номеру телефона."""
         with self.conn() as c:
-            c.execute('UPDATE listings SET status=? WHERE id=?', (status, listing_id))
+            row = c.execute(
+                'SELECT * FROM listings WHERE phone_clean=? ORDER BY created_at DESC LIMIT 1',
+                (phone_clean,)
+            ).fetchone()
+            return dict(row) if row else None
+
+    def update_listing_status(self, identifier, status: str):
+        """Обновляет статус. Принимает listing_id (int) или phone_clean (str)."""
+        with self.conn() as c:
+            if isinstance(identifier, int):
+                c.execute('UPDATE listings SET status=? WHERE id=?', (status, identifier))
+            elif isinstance(identifier, str) and identifier.startswith('test_'):
+                pass  # Тестовый ID — не трогаем БД
+            else:
+                c.execute('UPDATE listings SET status=? WHERE phone_clean=?', (status, str(identifier)))
+
+    def update_listing_script_step(self, identifier, step: int):
+        if isinstance(identifier, str) and identifier.startswith('test_'):
+            return
+        with self.conn() as c:
+            if isinstance(identifier, int):
+                c.execute('UPDATE listings SET script_step=? WHERE id=?', (step, identifier))
+            else:
+                c.execute('UPDATE listings SET script_step=? WHERE phone_clean=?', (step, str(identifier)))
+
+    def update_listing_ai_attempts(self, identifier, attempts: int):
+        if isinstance(identifier, str) and identifier.startswith('test_'):
+            return
+        with self.conn() as c:
+            if isinstance(identifier, int):
+                c.execute('UPDATE listings SET ai_attempts=? WHERE id=?', (attempts, identifier))
+            else:
+                c.execute('UPDATE listings SET ai_attempts=? WHERE phone_clean=?', (attempts, str(identifier)))
+
+    def increment_followup_count(self, identifier):
+        if isinstance(identifier, str) and identifier.startswith('test_'):
+            return
+        with self.conn() as c:
+            if isinstance(identifier, int):
+                c.execute(
+                    'UPDATE listings SET followup_count = COALESCE(followup_count, 0) + 1 WHERE id=?',
+                    (identifier,)
+                )
+            else:
+                c.execute(
+                    'UPDATE listings SET followup_count = COALESCE(followup_count, 0) + 1 WHERE phone_clean=?',
+                    (str(identifier),)
+                )
+
+    def update_last_contact(self, identifier):
+        """Обновляет время последнего контакта — чтобы followup не ушёл сразу."""
+        if isinstance(identifier, str) and identifier.startswith('test_'):
+            return
+        t = now_local()
+        with self.conn() as c:
+            if isinstance(identifier, int):
+                c.execute('UPDATE listings SET last_contact=? WHERE id=?', (t, identifier))
+            else:
+                c.execute('UPDATE listings SET last_contact=? WHERE phone_clean=?', (t, str(identifier)))
+
+    def get_listings_for_followup(self, status: str, hours_since_last: int, max_followups: int):
+        with self.conn() as c:
+            from datetime import datetime, timedelta
+            cutoff = datetime.now() - timedelta(hours=hours_since_last)
+            rows = c.execute(
+                '''SELECT * FROM listings 
+                   WHERE status=? 
+                   AND (followup_count IS NULL OR followup_count < ?)
+                   AND (last_contact IS NULL OR last_contact < ?)
+                   LIMIT 10''',
+                (status, max_followups, cutoff.isoformat())
+            ).fetchall()
+            return [dict(r) for r in rows]
 
     def get_listing_stats(self) -> dict:
         with self.conn() as c:
@@ -208,17 +305,36 @@ class Database:
 
     # ── Messages ──────────────────────────────────────────────────────────────
 
-    def save_message(self, conv_id: int, content: str, direction: str, is_ai=False):
+    def save_message(self, conv_or_listing_id, content: str, direction: str, is_ai=False):
+        """
+        Сохраняет сообщение. Совместим с двумя форматами:
+        - Старый: save_message(conv_id, content, 'OUTGOING', is_ai=True)
+        - Новый: save_message(listing_id, 'out', text)
+        """
+        # Нормализуем direction
+        dir_map = {'out': 'OUTGOING', 'in': 'INCOMING'}
+        direction = dir_map.get(direction, direction)
+
+        # Если id строковый (например 'manual_test_abc') — не сохраняем в БД
+        if isinstance(conv_or_listing_id, str) and not conv_or_listing_id.isdigit():
+            return
+
         t = now_local()
-        with self.conn() as c:
-            c.execute(
-                'INSERT INTO messages (conversation_id, content, direction, is_ai, created_at) VALUES (?,?,?,?,?)',
-                (conv_id, content, direction, 1 if is_ai else 0, t)
-            )
-            c.execute(
-                'UPDATE conversations SET last_message_at=? WHERE id=?',
-                (t, conv_id)
-            )
+        try:
+            with self.conn() as c:
+                c.execute(
+                    'INSERT INTO messages (conversation_id, content, direction, is_ai, created_at) VALUES (?,?,?,?,?)',
+                    (conv_or_listing_id, content, direction, 1 if is_ai else 0, t)
+                )
+                try:
+                    c.execute(
+                        'UPDATE conversations SET last_message_at=? WHERE id=?',
+                        (t, conv_or_listing_id)
+                    )
+                except Exception:
+                    pass
+        except Exception as e:
+            self.log('ERROR', 'DB', f'save_message: {e}')
 
     def get_messages(self, conv_id: int) -> list:
         with self.conn() as c:

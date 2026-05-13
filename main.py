@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import logging
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request, Depends
 from fastapi.staticfiles import StaticFiles
@@ -11,11 +12,12 @@ import uvicorn
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 from database import db
 from whatsapp import wa
 from parser import parser
-from bot import bot
+from bot import bot, run_self_test
 from auth import login, verify_token
 
 app = FastAPI(title="ParserKolesa")
@@ -75,6 +77,7 @@ class SettingsModel(BaseModel):
     ai_api_key: str = ""
     ai_model: str = "gpt-4o"
     ai_prompt: str = ""
+    groq_api_key: str = ""
     first_message: str = ""
     form_message: str = ""
     send_delay: int = 45
@@ -238,6 +241,170 @@ async def bot_status(request: Request):
     get_current_user(request)
     return {"is_running": bot.is_running, "stats": bot.stats}
 
+@app.post("/api/bot/self-test")
+async def bot_self_test(request: Request):
+    """Запускает режим самотестирования — бот разговаривает сам с собой."""
+    require_admin(request)
+    try:
+        history = await run_self_test(bot)
+        return {
+            "success": True,
+            "turns": len(history),
+            "conversation": [{"role": r, "message": m} for r, m in history]
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Ошибка самотестирования: {e}")
+
+# ─── Manual Test (Пользователь сам пишет боту) ─────────────────────────────────
+
+from typing import Dict
+import uuid
+
+# Хранилище активных ручных тестов в памяти
+manual_tests: Dict[str, dict] = {}
+
+class ManualTestStart(BaseModel):
+    car_brand: str = "Toyota"
+    car_model: str = "Camry"
+    year: int = 2023
+
+@app.post("/api/bot/manual-test/start")
+async def manual_test_start(data: ManualTestStart, request: Request):
+    """Начать ручной тест — пользователь сам пишет боту."""
+    require_admin(request)
+    import traceback
+    from bot import get_hook_message
+
+    test_id = str(uuid.uuid4())[:8]
+    phone = f"test_{test_id}"
+    listing_id = f'manual_test_{test_id}'
+
+    test_listing = {
+        'id': listing_id,
+        'phone': phone,
+        'phone_clean': phone,
+        'car_brand': data.car_brand,
+        'car_model': data.car_model,
+        'year': data.year,
+        'status': 'NEW',
+        'script_step': 0,
+        'followup_count': 0,
+    }
+
+    # Сохраняем в БД
+    try:
+        db.save_listing(test_listing)
+    except Exception as e:
+        logger.warning(f"Could not save listing: {e}")
+
+    # Создаем первое сообщение бота
+    first_message = get_hook_message(data.car_brand, data.car_model, data.year)
+
+    # Сохраняем сообщение в БД
+    try:
+        db.save_message(listing_id, 'out', first_message)
+    except Exception as e:
+        logger.warning(f"Could not save message: {e}")
+
+    # Сохраняем тест
+    manual_tests[test_id] = {
+        'listing': test_listing,
+        'history': [{'role': 'bot', 'message': first_message}],
+        'created_at': datetime.now().isoformat()
+    }
+
+    return {"success": True, "test_id": test_id, "first_message": first_message}
+
+class ManualTestMessage(BaseModel):
+    test_id: str
+    message: str
+
+@app.post("/api/bot/manual-test/message")
+async def manual_test_message(data: ManualTestMessage, request: Request):
+    """Отправить сообщение боту в ручном тесте."""
+    import traceback
+
+    # Auth
+    try:
+        require_admin(request)
+    except HTTPException as e:
+        raise e
+
+    if data.test_id not in manual_tests:
+        raise HTTPException(404, "Тест не найден. Начните новый тест.")
+
+    test = manual_tests[data.test_id]
+    listing = test['listing']
+    phone = listing['phone_clean']
+
+    # Сохраняем сообщение пользователя
+    test['history'].append({'role': 'user', 'message': data.message})
+
+    # Перехватываем все исходящие сообщения бота
+    captured_responses = []
+
+    async def capture_send(phone_num, text):
+        if text and text.strip():
+            captured_responses.append(text)
+        return True
+
+    async def capture_upload(phone_num, path, caption=""):
+        label = caption or "файл"
+        captured_responses.append(f"📎 [{label}]")
+        return True
+
+    # Патчим wa напрямую (не через bot.wa property)
+    original_send = wa.send_message
+    original_upload = wa.send_file_by_upload
+    wa.send_message = capture_send
+    wa.send_file_by_upload = capture_upload
+
+    error_info = None
+    try:
+        await bot.handle_incoming(phone, data.message, listing)
+    except Exception as e:
+        err = traceback.format_exc()
+        logger.error(f"Manual test bot error:\n{err}")
+        error_info = f"⚠️ {type(e).__name__}: {str(e)}"
+    finally:
+        # Всегда восстанавливаем оригиналы
+        wa.send_message = original_send
+        wa.send_file_by_upload = original_upload
+
+    # Добавляем ответы бота в историю
+    for resp in captured_responses:
+        test['history'].append({'role': 'bot', 'message': resp})
+
+    # Если была ошибка и бот ничего не отправил — показываем её в чате
+    if error_info and not captured_responses:
+        test['history'].append({'role': 'bot', 'message': error_info})
+
+    # Обновляем script_step в listing в памяти (не в БД)
+    curr = listing.get('script_step', 0)
+    listing['script_step'] = curr + 1
+
+    return {"success": True, "history": test['history']}
+
+@app.get("/api/bot/manual-test/{test_id}")
+async def manual_test_get(test_id: str, request: Request):
+    """Получить историю ручного теста."""
+    require_admin(request)
+
+    if test_id not in manual_tests:
+        raise HTTPException(404, "Тест не найден")
+
+    return {"success": True, "history": manual_tests[test_id]['history']}
+
+@app.delete("/api/bot/manual-test/{test_id}")
+async def manual_test_delete(test_id: str, request: Request):
+    """Удалить ручной тест."""
+    require_admin(request)
+
+    if test_id in manual_tests:
+        del manual_tests[test_id]
+
+    return {"success": True}
+
 # ─── Conversations ────────────────────────────────────────────────────────────
 
 @app.get("/api/conversations")
@@ -256,6 +423,136 @@ async def get_messages(conv_id: int, request: Request):
 async def get_logs(request: Request, limit: int = 200, source: str = ""):
     require_admin(request)
     return {"logs": db.get_logs(limit=limit, source=source)}
+
+# ─── Kolesa.kz Auth ──────────────────────────────────────────────────────────
+
+@app.get('/api/kolesa/status')
+async def kolesa_status(request: Request):
+    get_current_user(request)
+    import os, json as _json
+    if not os.path.exists('kolesa_session.json'):
+        return {'authorized': False, 'cookies': 0}
+    try:
+        with open('kolesa_session.json') as f:
+            cookies = _json.load(f)
+        # Проверяем есть ли auth cookies (klssid, kumd)
+        auth_cookies = [c for c in cookies if c.get('name') in ('klssid', 'kumd', 'ssid')]
+        return {'authorized': len(auth_cookies) > 0, 'cookies': len(cookies), 'auth_cookies': len(auth_cookies)}
+    except:
+        return {'authorized': False, 'cookies': 0}
+
+@app.post('/api/kolesa/login')
+async def kolesa_login(data: dict, request: Request):
+    require_admin(request)
+    login = data.get('login', '')
+    password = data.get('password', '')
+    if not login or not password:
+        raise HTTPException(400, 'Логин и пароль обязательны')
+    
+    # Save credentials to settings
+    db.save_settings({'kolesa_login': login, 'kolesa_password': password})
+    
+    # Run login in thread
+    import threading
+    result = {'success': False, 'error': ''}
+    
+    def do_login():
+        try:
+            from playwright.sync_api import sync_playwright
+            import time, json as _json
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                )
+                page = context.new_page()
+                
+                # Step 1: open login page
+                page.goto('https://id.kolesa.kz/login/', wait_until='domcontentloaded', timeout=30000)
+                time.sleep(2)
+                
+                # Step 2: enter phone number
+                page.fill('input[type="tel"], input[placeholder*="телефон"], input[name="phone"]', login)
+                page.click('button:has-text("Продолжить"), button[type="submit"]')
+                time.sleep(3)
+                
+                # Step 3: enter password if field appears
+                try:
+                    page.fill('input[type="password"]', password)
+                    page.click('button:has-text("Войти"), button[type="submit"]')
+                    time.sleep(3)
+                except Exception:
+                    pass
+                
+                # Save cookies regardless - check if login successful
+                current_url = page.url
+                cookies = context.cookies()
+                db.log('INFO', 'PARSER', f'URL после входа: {current_url}')
+                
+                if 'login' not in current_url or len(cookies) > 3:
+                    with open('kolesa_session.json', 'w') as f:
+                        _json.dump(cookies, f)
+                    result['success'] = True
+                    db.log('INFO', 'PARSER', f'Авторизация Kolesa.kz выполнена. Cookies: {len(cookies)}')
+                else:
+                    result['error'] = 'Неверный логин или пароль'
+                    db.log('ERROR', 'PARSER', f'Ошибка авторизации. URL: {current_url}')
+                
+                browser.close()
+        except Exception as e:
+            result['error'] = str(e)
+            db.log('ERROR', 'PARSER', f'Ошибка входа Kolesa.kz: {e}')
+    
+    t = threading.Thread(target=do_login)
+    t.start()
+    t.join(timeout=45)
+    
+    return result
+
+@app.post('/api/kolesa/manual-login')
+async def kolesa_manual_login(request: Request):
+    require_admin(request)
+    result = {'success': False, 'error': ''}
+    
+    def do_manual():
+        try:
+            from playwright.sync_api import sync_playwright
+            import time, json as _json
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=False)
+                context = browser.new_context(
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                )
+                page = context.new_page()
+                page.goto('https://id.kolesa.kz/login/')
+                
+                db.log('INFO', 'PARSER', 'Откройте браузер и войдите в Kolesa.kz вручную')
+                
+                # Ждём пока пользователь залогинится (до 120 сек)
+                for i in range(60):
+                    time.sleep(2)
+                    current_url = page.url
+                    if 'login' not in current_url:
+                        break
+                
+                # Сохраняем все cookies включая httpOnly
+                cookies = context.cookies()
+                with open('kolesa_session.json', 'w') as f:
+                    _json.dump(cookies, f)
+                
+                result['success'] = True
+                db.log('INFO', 'PARSER', f'Сессия сохранена: {len(cookies)} cookies')
+                browser.close()
+        except Exception as e:
+            result['error'] = str(e)
+            db.log('ERROR', 'PARSER', f'Ошибка: {e}')
+    
+    import threading
+    t = threading.Thread(target=do_manual)
+    t.start()
+    t.join(timeout=130)
+    
+    return result
 
 # ─── Webhook ──────────────────────────────────────────────────────────────────
 

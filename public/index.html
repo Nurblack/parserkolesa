@@ -9,8 +9,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #0a0a0f;
-  color: #e8e8f0;
+  background: #f5f6fa;
+  color: #1e1e2e;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   height: 100vh;
@@ -20,16 +20,17 @@ body {
 /* Sidebar */
 .sidebar {
   width: 220px;
-  background: #12121a;
-  border-right: 1px solid #1e1e30;
+  background: #ffffff;
+  border-right: 1px solid #e8eaf0;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,.04);
 }
 
 .logo {
   padding: 20px 18px;
-  border-bottom: 1px solid #1e1e30;
+  border-bottom: 1px solid #e8eaf0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -41,71 +42,54 @@ body {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.logo-text {
-  font-size: 15px;
-  font-weight: 700;
-  color: #e8e8f0;
-  letter-spacing: -0.3px;
-}
-.logo-sub {
-  font-size: 10px;
-  color: #55556a;
-  font-weight: 400;
-  margin-top: 1px;
-}
+.logo-text { font-size: 15px; font-weight: 700; color: #1e1e2e; }
+.logo-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; }
 
 .nav { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 1px; }
 
 .nav-item {
   display: flex; align-items: center; gap: 9px;
   padding: 9px 10px; border-radius: 7px;
-  color: #55556a; font-size: 13px; font-weight: 500;
+  color: #9ca3af; font-size: 13px; font-weight: 500;
   cursor: pointer; transition: all .15s;
   border: none; background: none; width: 100%; text-align: left;
 }
 .nav-item svg { flex-shrink: 0; }
-.nav-item:hover { background: #16162a; color: #a8a8c8; }
-.nav-item.active { background: rgba(108,92,231,.12); color: #8b7cf0; }
-.nav-item.active svg { color: #8b7cf0; }
+.nav-item:hover { background: #f3f4f6; color: #4b5563; }
+.nav-item.active { background: rgba(108,92,231,.08); color: #6c5ce7; }
+.nav-item.active svg { color: #6c5ce7; }
 
 .nav-section {
   padding: 14px 10px 4px;
-  font-size: 10px;
-  font-weight: 600;
-  color: #33334a;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  font-size: 10px; font-weight: 600;
+  color: #d1d5db;
+  text-transform: uppercase; letter-spacing: 0.8px;
 }
 
 .status-bar {
   padding: 12px 14px;
-  border-top: 1px solid #1e1e30;
+  border-top: 1px solid #e8eaf0;
   display: flex; flex-direction: column; gap: 7px;
+  background: #fafafa;
 }
-.status-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 11px; color: #55556a;
-}
-.dot {
-  width: 6px; height: 6px;
-  border-radius: 50%; flex-shrink: 0;
-  transition: background .3s;
-}
-.dot.green { background: #00d68f; box-shadow: 0 0 5px rgba(0,214,143,.5); }
-.dot.red { background: #3a3a4a; }
-.dot.yellow { background: #ffaa00; }
+.status-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #9ca3af; }
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transition: background .3s; }
+.dot.green { background: #10b981; box-shadow: 0 0 5px rgba(16,185,129,.4); }
+.dot.red { background: #e5e7eb; }
+.dot.yellow { background: #f59e0b; }
 
 /* Main */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 
 .header {
   padding: 16px 24px;
-  border-bottom: 1px solid #1e1e30;
-  background: #0e0e18;
+  border-bottom: 1px solid #e8eaf0;
+  background: #ffffff;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
-.header h2 { font-size: 16px; font-weight: 600; color: #c8c8e0; }
+.header h2 { font-size: 16px; font-weight: 600; color: #1e1e2e; }
 
 .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
 
@@ -115,22 +99,19 @@ body {
 
 /* Cards */
 .card {
-  background: #0e0e18;
-  border: 1px solid #1e1e30;
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
   border-radius: 10px;
   padding: 18px;
   margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
 .card-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #55556a;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 12px; font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase; letter-spacing: 0.5px;
   margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  display: flex; align-items: center; gap: 7px;
 }
 .card-title svg { color: #6c5ce7; }
 
@@ -141,26 +122,15 @@ body {
 
 /* Stats */
 .stat-card {
-  background: #0e0e18;
-  border: 1px solid #1e1e30;
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
   border-radius: 10px;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
 }
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #8b7cf0;
-  line-height: 1;
-}
-.stat-label {
-  font-size: 11px;
-  color: #33334a;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+.stat-value { font-size: 28px; font-weight: 700; color: #6c5ce7; line-height: 1; }
+.stat-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* Buttons */
 .btn {
@@ -172,58 +142,35 @@ body {
 }
 .btn svg { flex-shrink: 0; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
-
-.btn-primary {
-  background: #6c5ce7;
-  color: white;
-}
-.btn-primary:hover:not(:disabled) { background: #7d6ff0; }
-
-.btn-success {
-  background: rgba(0,214,143,.1);
-  color: #00d68f;
-  border: 1px solid rgba(0,214,143,.2);
-}
-.btn-success:hover:not(:disabled) { background: rgba(0,214,143,.18); }
-
-.btn-danger {
-  background: rgba(255,92,92,.1);
-  color: #ff5c5c;
-  border: 1px solid rgba(255,92,92,.2);
-}
-.btn-danger:hover:not(:disabled) { background: rgba(255,92,92,.18); }
-
-.btn-ghost {
-  background: transparent;
-  color: #55556a;
-  border: 1px solid #1e1e30;
-}
-.btn-ghost:hover:not(:disabled) { background: #16162a; color: #a8a8c8; }
-
+.btn-primary { background: #6c5ce7; color: white; }
+.btn-primary:hover:not(:disabled) { background: #5b4bd6; }
+.btn-success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.btn-success:hover:not(:disabled) { background: #d1fae5; }
+.btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.btn-danger:hover:not(:disabled) { background: #fee2e2; }
+.btn-ghost { background: #ffffff; color: #6b7280; border: 1px solid #e5e7eb; }
+.btn-ghost:hover:not(:disabled) { background: #f9fafb; color: #374151; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 
 /* Form */
 .form-group { margin-bottom: 12px; }
 .label {
   display: block; font-size: 11px; font-weight: 600;
-  color: #44445a; margin-bottom: 5px;
+  color: #9ca3af; margin-bottom: 5px;
   text-transform: uppercase; letter-spacing: 0.4px;
 }
 .input, .select, .textarea {
-  width: 100%;
-  padding: 8px 11px;
-  background: #0a0a0f;
-  border: 1px solid #1e1e30;
+  width: 100%; padding: 8px 11px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 7px;
-  color: #c8c8e0;
-  font-size: 13px;
-  outline: none;
-  transition: border-color .15s;
+  color: #1e1e2e; font-size: 13px;
+  outline: none; transition: border-color .15s;
   font-family: inherit;
 }
 .input:focus, .select:focus, .textarea:focus {
   border-color: #6c5ce7;
-  box-shadow: 0 0 0 2px rgba(108,92,231,.15);
+  box-shadow: 0 0 0 2px rgba(108,92,231,.1);
 }
 .textarea { resize: vertical; min-height: 80px; }
 .select { appearance: none; cursor: pointer; }
@@ -233,87 +180,74 @@ body {
 table { width: 100%; border-collapse: collapse; }
 th {
   text-align: left; padding: 9px 12px;
-  font-size: 10px; color: #33334a;
+  font-size: 10px; color: #9ca3af;
   text-transform: uppercase; letter-spacing: 0.5px;
-  border-bottom: 1px solid #1e1e30;
-  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb; font-weight: 600;
+  background: #f9fafb;
 }
 td {
   padding: 9px 12px; font-size: 12px;
-  border-bottom: 1px solid rgba(30,30,48,.8);
-  color: #55556a;
+  border-bottom: 1px solid #f3f4f6;
+  color: #6b7280;
 }
-tr:hover td { background: #0e0e18; color: #a8a8c8; }
+tr:hover td { background: #f9fafb; color: #374151; }
 
 /* Badge */
 .badge {
   display: inline-flex; align-items: center;
   padding: 2px 7px; border-radius: 4px;
-  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px;
 }
-.badge-new { background: rgba(0,180,216,.1); color: #00b4d8; }
-.badge-sent { background: rgba(108,92,231,.1); color: #8b7cf0; }
-.badge-replied { background: rgba(0,214,143,.1); color: #00d68f; }
-.badge-error { background: rgba(255,92,92,.1); color: #ff5c5c; }
-.badge-completed { background: rgba(0,214,143,.1); color: #00d68f; }
-.badge-form_sent { background: rgba(255,170,0,.1); color: #ffaa00; }
+.badge-new { background: #eff6ff; color: #2563eb; }
+.badge-sent { background: #f5f3ff; color: #6c5ce7; }
+.badge-replied { background: #ecfdf5; color: #059669; }
+.badge-error { background: #fef2f2; color: #dc2626; }
+.badge-completed { background: #ecfdf5; color: #059669; }
+.badge-form_sent { background: #fffbeb; color: #d97706; }
 
 /* Logs */
 .log-entry {
   display: flex; gap: 10px; padding: 5px 8px;
   font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px;
-  border-bottom: 1px solid rgba(30,30,48,.5);
+  border-bottom: 1px solid #f3f4f6;
 }
-.log-entry:hover { background: #0e0e18; }
-.log-time { color: #33334a; white-space: nowrap; min-width: 60px; }
+.log-entry:hover { background: #f9fafb; }
+.log-time { color: #d1d5db; white-space: nowrap; min-width: 60px; }
 .log-src { font-weight: 600; min-width: 72px; }
-.log-msg { color: #55556a; flex: 1; word-break: break-word; }
-.log-INFO .log-src { color: #4488cc; }
-.log-WARN .log-src { color: #ffaa00; }
-.log-ERROR .log-src { color: #ff5c5c; }
+.log-msg { color: #9ca3af; flex: 1; word-break: break-word; }
+.log-INFO .log-src { color: #2563eb; }
+.log-WARN .log-src { color: #d97706; }
+.log-ERROR .log-src { color: #dc2626; }
 
 /* Step card */
 .step-card {
-  background: #0a0a0f;
-  border: 1px solid #1e1e30;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 12px; margin-bottom: 8px;
   border-left: 2px solid #6c5ce7;
 }
 
 /* Hours bar */
 .hours-row { display: flex; align-items: center; gap: 10px; }
-.hours-bar {
-  flex: 1; height: 4px; background: #1e1e30;
-  border-radius: 2px; position: relative;
-}
-.hours-fill {
-  position: absolute; top: 0; bottom: 0;
-  background: #6c5ce7; border-radius: 2px;
-}
+.hours-bar { flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; position: relative; }
+.hours-fill { position: absolute; top: 0; bottom: 0; background: #6c5ce7; border-radius: 2px; }
 
-/* Divider */
-.divider {
-  height: 1px; background: #1e1e30;
-  margin: 14px 0;
-}
-
-/* WA status */
+/* WA status box */
 .wa-status-box {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 14px;
-  background: #0a0a0f;
-  border: 1px solid #1e1e30;
-  border-radius: 8px;
-  margin-bottom: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px; margin-bottom: 14px;
 }
-.wa-status-text { font-size: 13px; color: #a8a8c8; }
+.wa-status-text { font-size: 13px; color: #374151; }
 
 /* Spinner */
 .spinner {
   width: 14px; height: 14px;
-  border: 2px solid #1e1e30;
+  border: 2px solid #e5e7eb;
   border-top-color: #6c5ce7;
   border-radius: 50%;
   animation: spin .7s linear infinite;
@@ -323,22 +257,22 @@ tr:hover td { background: #0e0e18; color: #a8a8c8; }
 
 /* Alert */
 .alert { padding: 10px 14px; border-radius: 7px; font-size: 12px; margin-bottom: 12px; }
-.alert-success { background: rgba(0,214,143,.08); border: 1px solid rgba(0,214,143,.2); color: #00d68f; }
-.alert-error { background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.2); color: #ff5c5c; }
+.alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
 
 /* Empty */
 .empty {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; padding: 48px 20px;
-  color: #33334a; text-align: center; gap: 10px;
+  color: #d1d5db; text-align: center; gap: 10px;
 }
-.empty svg { opacity: .3; }
+.empty svg { opacity: .4; }
 .empty p { font-size: 13px; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e1e30; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -406,7 +340,7 @@ tr:hover td { background: #0e0e18; color: #a8a8c8; }
     <h2 id="page-title">Дашборд</h2>
     <div style="display:flex;gap:8px;align-items:center" id="header-actions">
     <span style="font-size:12px;color:#55556a">👤 <span id="username-label"></span></span>
-    <button onclick="logout()" style="background:none;border:1px solid #1e1e30;color:#55556a;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">Выйти</button>
+    <button onclick="logout()" style="background:none;border:1px solid #e5e7eb;color:#55556a;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px">Выйти</button>
   </div>
   </div>
 
@@ -512,12 +446,18 @@ https://kolesa.kz/cars/astana/"></textarea>
     <div class="section" id="section-bot">
       <div class="card">
         <div class="card-title"><i data-lucide="bot" width="13" height="13"></i> Управление ботом</div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <button class="btn btn-success" id="btn-bot-start" onclick="startBot()">
             <i data-lucide="play" width="13" height="13"></i> Запустить
           </button>
           <button class="btn btn-danger" id="btn-bot-stop" onclick="stopBot()" style="display:none">
             <i data-lucide="square" width="13" height="13"></i> Остановить
+          </button>
+          <button class="btn btn-secondary" onclick="runBotSelfTest()">
+            <i data-lucide="test-tube" width="13" height="13"></i> Обкатка
+          </button>
+          <button class="btn btn-secondary" onclick="startManualTest()">
+            <i data-lucide="message-square" width="13" height="13"></i> Ручной тест
           </button>
           <span id="bot-status-label" style="color:#33334a;font-size:12px">Бот остановлен</span>
         </div>
@@ -596,6 +536,32 @@ https://kolesa.kz/cars/astana/"></textarea>
     <!-- SETTINGS -->
     <div class="section" id="section-settings">
       <div class="card">
+        <div class="card-title"><i data-lucide="globe" width="13" height="13"></i> Аккаунт Kolesa.kz</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="label">Email / Телефон</label>
+            <input class="input" id="kolesa-login" placeholder="email или +7....">
+          </div>
+          <div class="form-group">
+            <label class="label">Пароль</label>
+            <input class="input" type="password" id="kolesa-password" placeholder="••••••••">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="checkKolesaSession()">
+            <i data-lucide="refresh-cw" width="12" height="12"></i> Проверить сессию
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="loginKolesa()">
+            <i data-lucide="log-in" width="12" height="12"></i> Авто-вход
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="manualLoginKolesa()">
+            <i data-lucide="external-link" width="12" height="12"></i> Войти вручную
+          </button>
+          <span id="kolesa-status" style="font-size:12px;color:#9ca3af">Статус неизвестен</span>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-title"><i data-lucide="smartphone" width="13" height="13"></i> Green API (WhatsApp)</div>
         <div class="grid-2">
           <div class="form-group">
@@ -640,8 +606,18 @@ https://kolesa.kz/cars/astana/"></textarea>
             <select class="select" id="ai-model"></select>
           </div>
           <div class="form-group" style="grid-column:1/-1">
-            <label class="label">API Ключ</label>
+            <label class="label">API Ключ (DeepSeek / OpenAI)</label>
             <input class="input" type="password" id="ai-api-key" placeholder="sk-...">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="label">Groq API Ключ <span style="color:#6c5ce7;font-size:10px">(для голосовых — Whisper)</span></label>
+            <input class="input" type="password" id="groq-api-key" placeholder="gsk_...">
+            <p style="font-size:10px;color:#666;margin-top:4px">Получить: <a href="https://console.groq.com/keys" target="_blank" style="color:#6c5ce7">console.groq.com/keys</a></p>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="label">AssemblyAI API Ключ <span style="color:#27ae60;font-size:10px">(рекомендуется — $50 бесплатно)</span></label>
+            <input class="input" type="password" id="assemblyai-api-key" placeholder="...">
+            <p style="font-size:10px;color:#666;margin-top:4px">Получить бесплатно: <a href="https://www.assemblyai.com/dashboard" target="_blank" style="color:#27ae60">assemblyai.com/dashboard</a></p>
           </div>
           <div class="form-group" style="grid-column:1/-1">
             <label class="label">Системный промпт</label>
@@ -776,6 +752,7 @@ function showSection(name) {
   if (name === 'logs') loadLogs()
   if (name === 'conversations') loadConversations()
   if (name === 'settings') loadSettings()
+  if (name === 'parser') restoreParserState()
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -783,7 +760,26 @@ async function api(method, url, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } }
   if (body) opts.body = JSON.stringify(body)
   const res = await fetch(url, opts)
-  return res.json()
+
+  const text = await res.text()
+
+  if (!res.ok) {
+    // Пытаемся распарсить JSON ошибку
+    try {
+      const err = JSON.parse(text)
+      throw new Error(err.detail || err.message || `HTTP ${res.status}`)
+    } catch (e) {
+      // Если не JSON, возвращаем текст ошибки
+      throw new Error(text || `HTTP ${res.status}`)
+    }
+  }
+
+  // Пытаемся распарсить JSON ответ
+  try {
+    return JSON.parse(text)
+  } catch (e) {
+    throw new Error('Неверный ответ сервера: ' + text.slice(0, 100))
+  }
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
@@ -823,10 +819,29 @@ async function loadDashboard() {
 const INSTANCE_ID = '7107608855'
 const API_TOKEN = '50a2f19843404151b86f17175cf2e2c910ca899908834dcf98'
 
+// ─── Parser state restore ────────────────────────────────────────────────────
+async function restoreParserState() {
+  // Restore saved URLs
+  const savedUrls = localStorage.getItem('parser_urls')
+  if (savedUrls && !document.getElementById('parser-urls').value) {
+    document.getElementById('parser-urls').value = savedUrls
+  }
+  // Check if parser is still running
+  const r = await api('GET', '/api/parser/status')
+  if (r.is_running) {
+    document.getElementById('btn-parser-start').style.display = 'none'
+    document.getElementById('btn-parser-stop').style.display = ''
+    document.getElementById('parser-dot').className = 'dot green'
+    document.getElementById('parser-status-text').textContent = 'Парсер работает'
+    pollParserStatus()
+  }
+}
+
 // ─── Parser ───────────────────────────────────────────────────────────────────
 async function startParser() {
   const urlsRaw = document.getElementById('parser-urls').value.trim()
   if (!urlsRaw) return alert('Введите URL')
+  localStorage.setItem('parser_urls', urlsRaw)
   const urls = urlsRaw.split('\n').map(u => u.trim()).filter(Boolean)
   const max_ads = parseInt(document.getElementById('parser-max').value) || 50
   const delay_ms = parseInt(document.getElementById('parser-delay').value) || 3000
@@ -943,14 +958,388 @@ async function loadListings() {
     '<tr><td colspan="6"><div class="empty"><p>Нет данных</p></div></td></tr>'
 }
 
+async function runBotSelfTest() {
+  const btn = document.querySelector('button[onclick="runBotSelfTest()"]')
+  const originalText = btn.innerHTML
+  btn.innerHTML = '<i data-lucide="loader-2" width="13" height="13" class="spin"></i> Обкатка...'
+  btn.disabled = true
+  lucide.createIcons()
+
+  try {
+    const r = await api('POST', '/api/bot/self-test')
+    if (r.success) {
+      showSelfTestModal(r.conversation)
+    } else {
+      alert(r.detail || 'Ошибка самотестирования')
+    }
+  } catch (e) {
+    alert('Ошибка: ' + e.message)
+  } finally {
+    btn.innerHTML = originalText
+    btn.disabled = false
+    lucide.createIcons()
+  }
+}
+
+function showSelfTestModal(conversation) {
+  const modal = document.createElement('div')
+  modal.className = 'modal-overlay'
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px'
+
+  const botMsgs = conversation.filter(c => c.role === 'bot').length
+  const clientMsgs = conversation.filter(c => c.role === 'client').length
+
+  const messages = conversation.map((c, idx) => {
+    const isBot = c.role === 'bot'
+    const avatar = isBot ? '🤖' : '👤'
+    const name = isBot ? 'БОТ (AUTOCOVERS)' : 'КЛИЕНТ (AI)'
+    const bg = isBot ? 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)' : 'linear-gradient(135deg,#11998e 0%,#38ef7d 100%)'
+    const textColor = 'white'
+    const align = isBot ? 'margin-right:auto' : 'margin-left:auto'
+    const borderRadius = isBot ? '16px 16px 16px 4px' : '16px 16px 4px 16px'
+
+    return `<div style="background:${bg};color:${textColor};padding:14px 18px;border-radius:${borderRadius};margin:10px 0;max-width:75%;${align};box-shadow:0 4px 15px rgba(0,0,0,0.1);animation:slideIn 0.3s ease ${idx * 0.05}s both">
+      <div style="font-size:11px;opacity:0.9;margin-bottom:6px;font-weight:600">${avatar} ${name}</div>
+      <div style="white-space:pre-wrap;font-size:14px;line-height:1.5">${escapeHtml(c.message)}</div>
+    </div>`
+  }).join('')
+
+  modal.innerHTML = `
+    <style>
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+    <div class="modal" style="background:#1a1a2e;border-radius:20px;max-width:800px;max-height:90vh;overflow:hidden;width:100%;box-shadow:0 25px 80px rgba(0,0,0,0.4);display:flex;flex-direction:column">
+      <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05)">
+        <div>
+          <h3 style="margin:0;font-size:20px;color:#fff">🎭 Полная обкатка бота</h3>
+          <div style="font-size:12px;color:#888;margin-top:4px">
+            ${conversation.length} сообщений • ${botMsgs} от бота • ${clientMsgs} от клиента
+          </div>
+        </div>
+        <button onclick="this.closest('.modal-overlay').remove()" style="background:rgba(255,255,255,0.1);border:none;cursor:pointer;font-size:20px;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s">&times;</button>
+      </div>
+      <div style="padding:24px;overflow-y:auto;max-height:60vh;background:#0f0f1a">
+        <div style="display:flex;flex-direction:column">${messages}</div>
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);display:flex;gap:12px;justify-content:space-between;align-items:center">
+        <div style="font-size:12px;color:#666">
+          🤖 Бот продаёт • 👤 AI имитирует клиента
+        </div>
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;color:white;padding:10px 24px;border-radius:8px;cursor:pointer;font-weight:500">
+          ✓ Закрыть
+        </button>
+      </div>
+    </div>
+  `
+
+  document.body.appendChild(modal)
+
+  // Закрытие по клику на фон
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove()
+  })
+
+  // Закрытие по Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      modal.remove()
+      document.removeEventListener('keydown', escHandler)
+    }
+  }
+  document.addEventListener('keydown', escHandler)
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
+
+// ─── Manual Test (Ручной тест бота) ─────────────────────────────────────────
+
+let currentManualTest = null
+let manualTestHistory = []
+
+async function startManualTest() {
+  // Показываем красивую модалку выбора авто вместо prompt()
+  const params = await showCarPickerModal()
+  if (!params) return
+
+  const { brand, model, year } = params
+
+  try {
+    const r = await api('POST', '/api/bot/manual-test/start', {
+      car_brand: brand,
+      car_model: model,
+      year: year
+    })
+
+    if (r.success) {
+      currentManualTest = r.test_id
+      manualTestHistory = [{role: 'bot', message: r.first_message}]
+      showManualTestModal(brand, model, year)
+    }
+  } catch (e) {
+    alert('Ошибка запуска теста: ' + e.message)
+  }
+}
+
+function showCarPickerModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px'
+
+    overlay.innerHTML = `
+      <div style="background:#1a1a2e;border-radius:18px;width:100%;max-width:420px;padding:28px;box-shadow:0 25px 80px rgba(0,0,0,0.5)">
+        <h3 style="color:#fff;font-size:18px;margin-bottom:6px">💬 Ручной тест бота</h3>
+        <p style="color:#888;font-size:13px;margin-bottom:22px">Введите данные авто — бот напишет как реальному клиенту</p>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="color:#aaa;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Марка</label>
+            <input id="cp-brand" type="text" value="Toyota"
+              style="width:100%;background:#0f0f1a;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none"
+              onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          </div>
+          <div>
+            <label style="color:#aaa;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Модель</label>
+            <input id="cp-model" type="text" value="Camry"
+              style="width:100%;background:#0f0f1a;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none"
+              onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          </div>
+          <div>
+            <label style="color:#aaa;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Год</label>
+            <input id="cp-year" type="number" value="2023" min="2000" max="2026"
+              style="width:100%;background:#0f0f1a;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none"
+              onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <button id="cp-cancel" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;border-radius:10px;padding:12px;cursor:pointer;font-size:14px">
+              Отмена
+            </button>
+            <button id="cp-start" style="flex:2;background:linear-gradient(135deg,#667eea,#764ba2);border:none;color:white;border-radius:10px;padding:12px;cursor:pointer;font-size:14px;font-weight:600">
+              🚀 Начать тест
+            </button>
+          </div>
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(overlay)
+    document.getElementById('cp-brand').focus()
+
+    const close = (result) => {
+      overlay.remove()
+      resolve(result)
+    }
+
+    document.getElementById('cp-cancel').onclick = () => close(null)
+    document.getElementById('cp-start').onclick = () => {
+      const brand = document.getElementById('cp-brand').value.trim() || 'Toyota'
+      const model = document.getElementById('cp-model').value.trim() || 'Camry'
+      const year = parseInt(document.getElementById('cp-year').value) || 2023
+      close({ brand, model, year })
+    }
+
+    // Enter в любом поле = старт
+    overlay.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('cp-start').click()
+      })
+    })
+
+    // Escape = отмена
+    const esc = (e) => { if (e.key === 'Escape') { close(null); document.removeEventListener('keydown', esc) } }
+    document.addEventListener('keydown', esc)
+  })
+}
+
+function showManualTestModal(brand, model, year) {
+  const modal = document.createElement('div')
+  modal.id = 'manual-test-modal'
+  modal.className = 'modal-overlay'
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px'
+
+  const renderMessages = () => {
+    return manualTestHistory.map((c, idx) => {
+      const isBot = c.role === 'bot'
+      const avatar = isBot ? '🤖' : '👤'
+      const name = isBot ? 'БОТ (AUTOCOVERS)' : 'ВЫ'
+      const bg = isBot ? 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)' : 'linear-gradient(135deg,#11998e 0%,#38ef7d 100%)'
+      const align = isBot ? 'margin-right:auto' : 'margin-left:auto'
+      const borderRadius = isBot ? '16px 16px 16px 4px' : '16px 16px 4px 16px'
+
+      return `<div style="background:${bg};color:white;padding:14px 18px;border-radius:${borderRadius};margin:10px 0;max-width:75%;${align};box-shadow:0 4px 15px rgba(0,0,0,0.2);animation:slideIn 0.3s ease ${idx * 0.05}s both">
+        <div style="font-size:11px;opacity:0.9;margin-bottom:6px;font-weight:600">${avatar} ${name}</div>
+        <div style="white-space:pre-wrap;font-size:14px;line-height:1.5">${escapeHtml(c.message)}</div>
+      </div>`
+    }).join('')
+  }
+
+  modal.innerHTML = `
+    <style>
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .chat-container::-webkit-scrollbar { width: 8px; }
+      .chat-container::-webkit-scrollbar-track { background: #0f0f1a; }
+      .chat-container::-webkit-scrollbar-thumb { background: #33334a; border-radius: 4px; }
+    </style>
+    <div class="modal" style="background:#1a1a2e;border-radius:20px;max-width:800px;max-height:90vh;overflow:hidden;width:100%;box-shadow:0 25px 80px rgba(0,0,0,0.5);display:flex;flex-direction:column">
+      <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05)">
+        <div>
+          <h3 style="margin:0;font-size:20px;color:#fff">💬 Ручной тест бота</h3>
+          <div style="font-size:12px;color:#888;margin-top:4px">${brand} ${model} ${year} • Тест: ${currentManualTest}</div>
+        </div>
+        <button onclick="closeManualTest()" style="background:rgba(255,255,255,0.1);border:none;cursor:pointer;font-size:20px;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center">&times;</button>
+      </div>
+      <div id="manual-chat" class="chat-container" style="padding:24px;overflow-y:auto;max-height:55vh;background:#0f0f1a;min-height:300px">
+        ${renderMessages()}
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);display:flex;gap:12px">
+        <input type="text" id="manual-input" placeholder="Напишите сообщение боту..." style="flex:1;background:#0f0f1a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;outline:none"
+          onkeydown="if(event.key==='Enter')sendManualMessage()">
+        <button onclick="sendManualMessage()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;color:white;padding:12px 24px;border-radius:10px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:8px">
+          <i data-lucide="send" width="16" height="16"></i> Отправить
+        </button>
+      </div>
+    </div>
+  `
+
+  document.body.appendChild(modal)
+  lucide.createIcons()
+  scrollToBottom()
+
+  // Фокус на input
+  setTimeout(() => document.getElementById('manual-input')?.focus(), 100)
+
+  // Закрытие по Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') closeManualTest()
+  }
+  document.addEventListener('keydown', escHandler)
+  modal._escHandler = escHandler
+}
+
+async function sendManualMessage() {
+  const input = document.getElementById('manual-input')
+  const message = input?.value?.trim()
+  if (!message || !currentManualTest) return
+
+  input.value = ''
+  input.disabled = true
+
+  // Добавляем сообщение пользователя сразу
+  manualTestHistory.push({role: 'user', message: message})
+  updateChatDisplay()
+
+  // Показываем индикатор "печатает..."
+  showTypingIndicator()
+
+  try {
+    const r = await api('POST', '/api/bot/manual-test/message', {
+      test_id: currentManualTest,
+      message: message
+    })
+
+    hideTypingIndicator()
+
+    if (r.success) {
+      manualTestHistory = r.history
+      updateChatDisplay()
+    }
+  } catch (e) {
+    hideTypingIndicator()
+    alert('Ошибка: ' + e.message)
+  } finally {
+    input.disabled = false
+    input.focus()
+  }
+}
+
+function showTypingIndicator() {
+  const chat = document.getElementById('manual-chat')
+  if (!chat) return
+  const div = document.createElement('div')
+  div.id = 'typing-indicator'
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:14px 18px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:16px 16px 16px 4px;max-width:160px;margin:10px 0;box-shadow:0 4px 15px rgba(0,0,0,0.2)'
+  div.innerHTML = `
+    <span style="color:rgba(255,255,255,0.8);font-size:11px;font-weight:600">🤖 БОТ пишет</span>
+    <span style="display:flex;gap:4px">
+      <span style="width:6px;height:6px;background:white;border-radius:50%;animation:bounce 1.2s infinite 0s"></span>
+      <span style="width:6px;height:6px;background:white;border-radius:50%;animation:bounce 1.2s infinite 0.2s"></span>
+      <span style="width:6px;height:6px;background:white;border-radius:50%;animation:bounce 1.2s infinite 0.4s"></span>
+    </span>
+    <style>@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}</style>
+  `
+  chat.appendChild(div)
+  scrollToBottom()
+}
+
+function hideTypingIndicator() {
+  document.getElementById('typing-indicator')?.remove()
+}
+
+function updateChatDisplay() {
+  const chat = document.getElementById('manual-chat')
+  if (!chat) return
+
+  chat.innerHTML = manualTestHistory.map((c, idx) => {
+    const isBot = c.role === 'bot'
+    const avatar = isBot ? '🤖' : '👤'
+    const name = isBot ? 'БОТ (AUTOCOVERS)' : 'ВЫ'
+    const bg = isBot ? 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)' : 'linear-gradient(135deg,#11998e 0%,#38ef7d 100%)'
+    const align = isBot ? 'margin-right:auto' : 'margin-left:auto'
+    const borderRadius = isBot ? '16px 16px 16px 4px' : '16px 16px 4px 16px'
+
+    return `<div style="background:${bg};color:white;padding:14px 18px;border-radius:${borderRadius};margin:10px 0;max-width:75%;${align};box-shadow:0 4px 15px rgba(0,0,0,0.2);animation:slideIn 0.3s ease ${idx * 0.05}s both">
+      <div style="font-size:11px;opacity:0.9;margin-bottom:6px;font-weight:600">${avatar} ${name}</div>
+      <div style="white-space:pre-wrap;font-size:14px;line-height:1.5">${escapeHtml(c.message)}</div>
+    </div>`
+  }).join('')
+
+  scrollToBottom()
+}
+
+function scrollToBottom() {
+  const chat = document.getElementById('manual-chat')
+  if (chat) {
+    setTimeout(() => chat.scrollTop = chat.scrollHeight, 50)
+  }
+}
+
+async function closeManualTest() {
+  const modal = document.getElementById('manual-test-modal')
+  if (modal) {
+    if (modal._escHandler) {
+      document.removeEventListener('keydown', modal._escHandler)
+    }
+    modal.remove()
+  }
+
+  // Удаляем тест на сервере
+  if (currentManualTest) {
+    try {
+      await api('DELETE', `/api/bot/manual-test/${currentManualTest}`)
+    } catch (e) {}
+    currentManualTest = null
+    manualTestHistory = []
+  }
+}
+
 // ─── Conversations ────────────────────────────────────────────────────────────
 async function loadConversations() {
   const r = await api('GET', '/api/conversations?limit=50')
   const convs = r.conversations || []
   document.getElementById('conv-list').innerHTML = convs.length ? convs.map(c => `
     <div onclick="loadMessages(${c.id},'${c.phone}')"
-      style="padding:10px 8px;border-bottom:1px solid #1e1e30;cursor:pointer;border-radius:6px;margin-bottom:2px"
-      onmouseover="this.style.background='#0e0e18'" onmouseout="this.style.background=''">
+      style="padding:10px 8px;border-bottom:1px solid #e5e7eb;cursor:pointer;border-radius:6px;margin-bottom:2px"
+      onmouseover="this.style.background='#ffffff'" onmouseout="this.style.background=''">
       <div style="font-size:12px;font-weight:600;color:#a8a8c8">${c.phone}</div>
       <div style="font-size:11px;color:#33334a;margin-top:2px">${[c.car_brand,c.car_model,c.year].filter(Boolean).join(' ')||''}</div>
       <div style="font-size:11px;color:#44445a;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.last_message||''}</div>
@@ -968,7 +1357,7 @@ async function loadMessages(convId, phone) {
     const out = m.direction === 'OUTGOING'
     return `
       <div style="display:flex;justify-content:${out?'flex-end':'flex-start'}">
-        <div style="max-width:72%;padding:8px 12px;border-radius:${out?'12px 12px 3px 12px':'12px 12px 12px 3px'};background:${out?'#6c5ce7':'#0e0e18'};border:1px solid ${out?'transparent':'#1e1e30'};font-size:12px;line-height:1.5;color:${out?'white':'#a8a8c8'}">
+        <div style="max-width:72%;padding:8px 12px;border-radius:${out?'12px 12px 3px 12px':'12px 12px 12px 3px'};background:${out?'#6c5ce7':'#ffffff'};border:1px solid ${out?'transparent':'#e5e7eb'};font-size:12px;line-height:1.5;color:${out?'white':'#a8a8c8'}">
           ${m.content}
           <div style="font-size:9px;opacity:.5;margin-top:3px;text-align:right">${toLocal(m.created_at)}</div>
         </div>
@@ -981,7 +1370,11 @@ async function loadMessages(convId, phone) {
 async function loadSettings() {
   const r = await api('GET', '/api/settings')
   const s = r.settings || {}
+  document.getElementById('kolesa-login').value = s.kolesa_login || ''
+  // don't restore password for security
   document.getElementById('green-instance').value = s.green_api_instance_id || ''
+  document.getElementById('kolesa-login').value = s.kolesa_login || ''
+  // don't restore password for security
   document.getElementById('green-instance').value = s.green_api_instance_id || ''
   document.getElementById('green-token').value = s.green_api_token || ''
   const wl = s.whitelist || []
@@ -990,8 +1383,10 @@ async function loadSettings() {
   updateModelList()
   document.getElementById('ai-model').value = s.ai_model || 'gpt-4o'
   document.getElementById('ai-api-key').value = s.ai_api_key || ''
+  document.getElementById('groq-api-key').value = s.groq_api_key || ''
+  document.getElementById('assemblyai-api-key').value = s.assemblyai_api_key || ''
   document.getElementById('ai-prompt').value = s.ai_prompt || 'Ты — менеджер по продажам автомобильных ковриков. Будь дружелюбным, отвечай коротко.'
-  document.getElementById('first-message').value = s.first_message || 'Здравствуйте! 👋 Увидел ваше объявление на Kolesa.kz. Хотел предложить качественные автомобильные коврики для вашего {car}. Интересно?'
+  document.getElementById('first-message').value = s.first_message || 'Здравствуйте! 👋 Увидел ваше объявление на Kolesa. Хотел предложить качественные авточехлы для вашего {car}. Интересно?'
   document.getElementById('form-message').value = s.form_message || 'Отлично! Заполните форму для оформления заказа: {formLink}'
   document.getElementById('hours-start').value = s.working_hours_start ?? 9
   document.getElementById('hours-end').value = s.working_hours_end ?? 21
@@ -1008,6 +1403,8 @@ async function saveSettings() {
     ai_provider: document.getElementById('ai-provider').value,
     ai_model: document.getElementById('ai-model').value,
     ai_api_key: document.getElementById('ai-api-key').value,
+    groq_api_key: document.getElementById('groq-api-key').value,
+    assemblyai_api_key: document.getElementById('assemblyai-api-key').value,
     ai_prompt: document.getElementById('ai-prompt').value,
     first_message: document.getElementById('first-message').value,
     form_message: document.getElementById('form-message').value,
@@ -1019,6 +1416,8 @@ async function saveSettings() {
     conversation_script: script,
     green_api_instance_id: document.getElementById('green-instance').value,
     green_api_token: document.getElementById('green-token').value,
+    kolesa_login: document.getElementById('kolesa-login').value,
+    kolesa_password: document.getElementById('kolesa-password').value,
     whitelist: document.getElementById('whitelist').value.split('\n').map(s=>s.trim().replace(/\D/g,'')).filter(Boolean)
   }
   const r = await api('PUT', '/api/settings', data)
@@ -1053,7 +1452,7 @@ function renderScript() {
         <span style="font-size:10px;font-weight:700;color:${STEP_COLORS[step.type]};background:${STEP_COLORS[step.type]}18;padding:2px 7px;border-radius:3px">
           #${step.order} ${STEP_LABELS[step.type]||step.type}
         </span>
-        <select onchange="updateStep(${i},'type',this.value);renderScript()" style="background:#0a0a0f;border:1px solid #1e1e30;border-radius:5px;color:#a8a8c8;padding:3px 7px;font-size:11px">
+        <select onchange="updateStep(${i},'type',this.value);renderScript()" style="background:#f0f2f5;border:1px solid #e5e7eb;border-radius:5px;color:#a8a8c8;padding:3px 7px;font-size:11px">
           ${Object.entries(STEP_LABELS).map(([v,l])=>`<option value="${v}"${step.type===v?' selected':''}>${l}</option>`).join('')}
         </select>
         <div style="margin-left:auto;display:flex;gap:3px">
@@ -1063,10 +1462,10 @@ function renderScript() {
         </div>
       </div>
       <textarea oninput="updateStep(${i},'message',this.value)"
-        style="width:100%;background:#0a0a0f;border:1px solid #1e1e30;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:55px;font-family:inherit"
+        style="width:100%;background:#f0f2f5;border:1px solid #e5e7eb;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:55px;font-family:inherit"
         placeholder="Текст сообщения...">${step.message||''}</textarea>
       ${step.type==='objection'?`<textarea oninput="updateStep(${i},'objection_reply',this.value)"
-        style="width:100%;background:#0a0a0f;border:1px solid #1e1e30;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:45px;font-family:inherit;margin-top:6px"
+        style="width:100%;background:#f0f2f5;border:1px solid #e5e7eb;border-radius:6px;color:#a8a8c8;padding:7px;font-size:12px;resize:vertical;min-height:45px;font-family:inherit;margin-top:6px"
         placeholder="Ответ на возражение...">${step.objection_reply||''}</textarea>`:''}
     </div>
   `).join('')
@@ -1107,6 +1506,48 @@ function toggleAutoRefresh() {
   if(document.getElementById('auto-refresh').checked)
     autoRefreshInterval = setInterval(loadLogs, 3000)
   else clearInterval(autoRefreshInterval)
+}
+
+// ─── Kolesa.kz ───────────────────────────────────────────────────────────────
+async function checkKolesaSession() {
+  const el = document.getElementById('kolesa-status')
+  el.textContent = 'Проверка...'
+  const r = await api('GET', '/api/kolesa/status')
+  if (r.authorized) {
+    el.innerHTML = `<span style="color:#059669">✓ Авторизован (${r.cookies} cookies, ${r.auth_cookies} auth)</span>`
+  } else if (r.cookies > 0) {
+    el.innerHTML = `<span style="color:#d97706">⚠ Cookies есть (${r.cookies}), но нет авторизации. Войдите заново.</span>`
+  } else {
+    el.innerHTML = '<span style="color:#dc2626">✗ Не авторизован. Нажмите "Войти вручную"</span>'
+  }
+}
+
+async function loginKolesa() {
+  const login = document.getElementById('kolesa-login').value.trim()
+  const password = document.getElementById('kolesa-password').value
+  if (!login || !password) {
+    alert('Введите логин и пароль от Kolesa.kz')
+    return
+  }
+  const el = document.getElementById('kolesa-status')
+  el.textContent = 'Выполняется вход...'
+  const r = await api('POST', '/api/kolesa/login', { login, password })
+  if (r.success) {
+    el.innerHTML = '<span style="color:#059669">✓ Успешно авторизован!</span>'
+  } else {
+    el.innerHTML = `<span style="color:#dc2626">✗ Ошибка: ${r.error || 'Неверные данные'}</span>`
+  }
+}
+
+async function manualLoginKolesa() {
+  const el = document.getElementById('kolesa-status')
+  el.textContent = 'Открывается браузер — войдите в аккаунт...'
+  const r = await api('POST', '/api/kolesa/manual-login', {})
+  if (r.success) {
+    el.innerHTML = '<span style="color:#059669">✓ Сессия сохранена!</span>'
+  } else {
+    el.innerHTML = '<span style="color:#dc2626">✗ ' + (r.error || 'Ошибка') + '</span>'
+  }
 }
 
 // ─── Green API ─────────────────────────────────────────────────────────────────
@@ -1190,13 +1631,17 @@ async function addNumber() {
     price: document.getElementById('add-price').value.trim()
   }
 
-  const r = await api('POST', '/api/listings/add', data)
-  if (r.success) {
-    document.getElementById('add-alert').innerHTML = '<div class="alert alert-success">✓ Номер добавлен, бот напишет при следующем цикле</div>'
-    loadListings()
-    setTimeout(hideAddModal, 1500)
-  } else {
-    document.getElementById('add-alert').innerHTML = '<div class="alert alert-error">' + (r.detail || r.error || 'Ошибка') + '</div>'
+  try {
+    const r = await api('POST', '/api/listings/add', data)
+    if (r.success) {
+      document.getElementById('add-alert').innerHTML = '<div class="alert alert-success">✓ Номер добавлен, бот напишет при следующем цикле</div>'
+      loadListings()
+      setTimeout(hideAddModal, 1500)
+    } else {
+      document.getElementById('add-alert').innerHTML = '<div class="alert alert-error">' + (r.detail || r.error || 'Ошибка') + '</div>'
+    }
+  } catch (e) {
+    document.getElementById('add-alert').innerHTML = '<div class="alert alert-error">' + (e.message || 'Ошибка сервера') + '</div>'
   }
 }
 
@@ -1242,13 +1687,14 @@ document.addEventListener('DOMContentLoaded', () => {
   applyRoleUI()
   lucide.createIcons()
   loadDashboard()
+  restoreParserState()
   setInterval(loadDashboard, 10000)
 })
 </script>
 
 <!-- Add Number Modal -->
 <div id="add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center">
-  <div style="background:#0e0e18;border:1px solid #1e1e30;border-radius:12px;padding:24px;width:420px">
+  <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;width:420px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
       <span style="font-size:14px;font-weight:600;color:#c8c8e0">Добавить номер вручную</span>
       <button onclick="hideAddModal()" style="background:none;border:none;color:#55556a;cursor:pointer">
